@@ -1,88 +1,82 @@
 import requests
 from datetime import datetime
 import time
+import json
 
 # --- CONFIGURACIÓN ---
-# Abre el archivo y guarda el contenido en la variable 'contenido'
-with open('api.txt', 'r', encoding='utf-8') as archivo:
-    API_KEY = archivo.read()
-MIS_SERVIDORES = ["1184252455580610570","1174999750878187520","1041361547991208048","703326394234568785",
-                  "883885047604711475","1459468417923813451","1282514878262804621","833645497473433610",
-                  "1465636323611119649","1374406840179232838","1313151590206803998","918730780467941376",
-                  "936312188484874310","1436625771870294088"]  
+with open('api.txt', 'r', encoding='utf-8') as f:
+    ACCESS_TOKEN = f.read().strip()
 
-def consultar_servidor(s_id):
-    """Prueba la conexión con el servidor usando el protocolo estricto."""
-    # Intentamos con el subdominio .dev que es el más actualizado para la v4
-    url = f"https://raid-helper.dev/api/v4/servers/{s_id}/events"
-    
-    # Formato de header que exige la v4 para tokens de usuario/bot
-    headers = {
-        "Authorization": f"{API_KEY}", # Prueba 1: Solo el token
-        "Content-Type": "application/json"
+MIS_SERVIDORES = [
+    "1184252455580610570", "1174999750878187520", "1041361547991208048", "703326394234568785",
+    "883885047604711475",  "1459468417923813451", "1282514878262804621", "833645497473433610",
+    "1465636323611119649", "1374406840179232838", "1313151590206803998", "918730780467941376",
+    "936312188484874310",  "1436625771870294088"
+]
+
+ENDPOINT_EVENTS = "https://raid-helper.xyz/api/events/"
+
+def obtener_eventos_servidor(server_id):
+    """Obtiene todos los eventos de un servidor usando el accessToken de sesión."""
+    payload = {
+        "serverid": server_id,
+        "accessToken": ACCESS_TOKEN
     }
-    
     try:
-        res = requests.get(url, headers=headers)
-        
-        # Si falla por token, intentamos el formato alternativo de prefijo
-        if res.status_code == 401 or (res.json().get('status') == 'failed'):
-            headers["Authorization"] = f"Apikey {API_KEY}" # Prueba 2: Con prefijo
-            res = requests.get(url, headers=headers)
-            
-        return res.json()
+        res = requests.post(ENDPOINT_EVENTS, json=payload, timeout=10)
+        res.raise_for_status()
+        datos = res.json()
+        return datos.get("servername", server_id), datos.get("events", [])
+    except requests.exceptions.HTTPError as e:
+        print(f"  [ERROR HTTP] Servidor {server_id}: {e}")
+        return server_id, []
     except Exception as e:
-        return {"status": "failed", "reason": str(e)}
+        print(f"  [ERROR] Servidor {server_id}: {e}")
+        return server_id, []
 
-def obtener_datos():
+def obtener_mi_agenda():
+    """Obtiene los eventos donde ya estoy anotado (User API Key separada si la tienes)."""
+    # Por ahora retorna lista vacía - se puede integrar después
+    return []
+
+def obtener_todos_los_datos():
     ahora_unix = int(time.time())
-    
-    # 1. Agenda Personal (v4 User)
-    # Este endpoint es más flexible, lo mantenemos como te funcionó antes
-    url_user = f"https://raid-helper.xyz/api/v4/users/{API_KEY}/events"
-    try:
-        res_user = requests.get(url_user)
-        agenda_total = res_user.json()
-    except:
-        agenda_total = []
+    todos_eventos = []
 
-    mi_agenda = [e for e in agenda_total if int(e.get('startTime', 0)) > ahora_unix]
-    ids_mi_agenda = {e['id'] for e in mi_agenda}
-
-    # 2. Explorador de Servidores
-    raids_disponibles = []
+    print("Consultando servidores", end="", flush=True)
     for s_id in MIS_SERVIDORES:
-        datos_server = consultar_servidor(s_id)
-        
-        if isinstance(datos_server, list):
-            for ev in datos_server:
-                if int(ev.get('startTime', 0)) > ahora_unix and ev['id'] not in ids_mi_agenda:
-                    # Añadimos el nombre del servidor si no viene en el JSON
-                    ev['server_id_ref'] = s_id 
-                    raids_disponibles.append(ev)
-        else:
-            print(f"DEBUG: Error en servidor {s_id}: {datos_server}")
+        nombre_server, eventos = obtener_eventos_servidor(s_id)
+        print(".", end="", flush=True)
 
-    return sorted(mi_agenda, key=lambda x: x['startTime']), sorted(raids_disponibles, key=lambda x: x['startTime'])
+        for ev in eventos:
+            if int(ev.get("unixtime", 0)) > ahora_unix:
+                ev["_servidor"] = nombre_server  # añadimos nombre del server
+                todos_eventos.append(ev)
 
-def imprimir_tabla():
-    mi_agenda, disponibles = obtener_datos()
+    print(" ¡Listo!")
+    return sorted(todos_eventos, key=lambda x: x["unixtime"])
 
-    print(f"\n{'='*20} MI AGENDA EN LIMA {'='*20}")
-    print(f"{'FECHA':<15} | {'RAID':<25} | {'LIDER'}")
-    print("-" * 65)
-    for r in mi_agenda:
-        fecha = datetime.fromtimestamp(int(r['startTime'])).strftime('%d/%m %H:%M')
-        print(f"{fecha:<15} | {r['title'][:25]:<25} | {r['leaderName'][:15]}")
+def imprimir_tabla(eventos):
+    if not eventos:
+        print("\nNo se encontraron eventos futuros.")
+        return
 
-    print(f"\n{'='*20} DISPONIBLES PARA UNIRSE {'='*20}")
-    print(f"{'FECHA':<15} | {'RAID':<25} | {'ID EVENTO'}")
-    print("-" * 65)
-    if not disponibles:
-        print("No se encontraron raids nuevas.")
-    for r in disponibles:
-        fecha = datetime.fromtimestamp(int(r['startTime'])).strftime('%d/%m %H:%M')
-        print(f"{fecha:<15} | {r['title'][:25]:<25} | {r['id']}")
+    print(f"\n{'='*75}")
+    print(f"{'FECHA':<14} {'HORA':<6} {'SERVIDOR':<22} {'RAID':<25} {'ANOTADOS'}")
+    print(f"{'-'*75}")
+
+    for ev in eventos:
+        fecha = datetime.fromtimestamp(int(ev["unixtime"])).strftime('%d/%m/%Y')
+        hora  = ev.get("time", "??:??")
+        server = ev.get("_servidor", "?")[:21]
+        titulo = ev.get("displayTitle", ev.get("title", "Sin título"))[:24]
+        anotados = ev.get("signupcount", "?")
+
+        print(f"{fecha:<14} {hora:<6} {server:<22} {titulo:<25} {anotados}")
+
+    print(f"{'-'*75}")
+    print(f"Total de raids próximas: {len(eventos)}")
 
 if __name__ == "__main__":
-    imprimir_tabla()
+    eventos_futuros = obtener_todos_los_datos()
+    imprimir_tabla(eventos_futuros)
