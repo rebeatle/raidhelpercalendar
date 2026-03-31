@@ -21,7 +21,6 @@ OPCIONES_DIAS = [
 class DetalleEventoModal(ModalScreen):
     """Modal con el detalle completo de un evento."""
 
-    BINDINGS = [("escape", "dismiss", "Cerrar")]
 
     def __init__(self, evento: dict):
         super().__init__()
@@ -154,6 +153,8 @@ class RaidHelperApp(App):
         tabla.add_columns("Fecha", "Hora", "Servidor", "Raid", "👥")
 
         self._aplicar_filtros()
+        
+
 
     def _aplicar_filtros(self) -> None:
         """Filtra los eventos y refresca la tabla."""
@@ -192,6 +193,13 @@ class RaidHelperApp(App):
     def cambio_servidor(self, event: Select.Changed) -> None:
         self._filtro_servidor = str(event.value) if event.value else ""
         self._aplicar_filtros()
+
+    @on(DataTable.RowSelected)
+    def fila_seleccionada(self, event: DataTable.RowSelected) -> None:
+        """Se dispara cuando el usuario presiona Enter en una fila."""
+        fila = event.cursor_row
+        if 0 <= fila < len(self._eventos_filtrados):
+            self.push_screen(DetalleEventoModal(self._eventos_filtrados[fila]))
 
     def action_ver_detalle(self) -> None:
         """Abre el modal con el detalle del evento seleccionado."""
