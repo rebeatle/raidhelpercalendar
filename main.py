@@ -3,7 +3,9 @@ from datetime import datetime
 import time
 
 # --- CONFIGURACIÓN ---
-API_KEY = "HeRPxNmAjLLj9SutMpSpoqx21RVBLZPbmRJ4K8Ic"
+# Abre el archivo y guarda el contenido en la variable 'contenido'
+with open('api.txt', 'r', encoding='utf-8') as archivo:
+    API_KEY = archivo.read()
 MIS_SERVIDORES = ["1184252455580610570","1174999750878187520","1041361547991208048","703326394234568785",
                   "883885047604711475","1459468417923813451","1282514878262804621","833645497473433610",
                   "1465636323611119649","1374406840179232838","1313151590206803998","918730780467941376",
