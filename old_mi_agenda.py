@@ -6,10 +6,7 @@ import time
 # Abre el archivo y guarda el contenido en la variable 'contenido'
 with open('api_key.txt', 'r', encoding='utf-8') as archivo:
     API_KEY = archivo.read()
-MIS_SERVIDORES = ["1184252455580610570","1174999750878187520","1041361547991208048","703326394234568785",
-                  "883885047604711475","1459468417923813451","1282514878262804621","833645497473433610",
-                  "1465636323611119649","1374406840179232838","1313151590206803998","918730780467941376",
-                  "936312188484874310","1436625771870294088"]  
+MIS_SERVIDORES = ["1184252455580610570"]  
 
 def consultar_servidor(s_id):
     """Prueba la conexión con el servidor usando el protocolo estricto."""
@@ -43,6 +40,7 @@ def obtener_datos():
     try:
         res_user = requests.get(url_user)
         agenda_total = res_user.json()
+        #print(agenda_total)
     except:
         agenda_total = []
 
@@ -53,6 +51,7 @@ def obtener_datos():
     raids_disponibles = []
     for s_id in MIS_SERVIDORES:
         datos_server = consultar_servidor(s_id)
+        
         
         if isinstance(datos_server, list):
             for ev in datos_server:
@@ -67,13 +66,25 @@ def obtener_datos():
 
 def imprimir_tabla():
     mi_agenda, disponibles = obtener_datos()
+    print(mi_agenda)
 
     print(f"\n{'='*20} MI AGENDA EN LIMA {'='*20}")
-    print(f"{'FECHA':<15} | {'RAID':<25} | {'LIDER'}")
-    print("-" * 65)
+    print(f"{'FECHA':<15} | {'RAID':<25} | {'LIDER':<15} | {'PLAYER':<15} | {'SPEC':<10} | {'CLASS'}")
+    print("-" * 120)
     for r in mi_agenda:
         fecha = datetime.fromtimestamp(int(r['startTime'])).strftime('%d/%m %H:%M')
-        print(f"{fecha:<15} | {r['title'][:25]:<25} | {r['leaderName'][:15]}")
+        raid_title = r['title'][:25]
+        leader_name = r['leaderName'][:15]
+        
+        # Iterar sobre los signups
+        if 'signUps' in r and r['signUps']:
+            for signup in r['signUps']:
+                player_name = signup['name'][:15]
+                spec_name = signup['specName'][:10]
+                player_class = signup['className']
+                print(f"{fecha:<15} | {raid_title:<25} | {leader_name:<15} | {player_name:<15} | {spec_name:<10} | {player_class}")
+        else:
+            print(f"{fecha:<15} | {raid_title:<25} | {leader_name:<15} | {'N/A':<15} | {'N/A':<10} | N/A")
 
     print(f"\n{'='*20} DISPONIBLES PARA UNIRSE {'='*20}")
     print(f"{'FECHA':<15} | {'RAID':<25} | {'ID EVENTO'}")
