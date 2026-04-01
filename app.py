@@ -17,41 +17,116 @@ OPCIONES_DIAS = [
     ("Todos",            "0"),
 ]
 
-
 class DetalleEventoModal(ModalScreen):
-    """Modal con el detalle completo de un evento."""
+    """Modal con el detalle completo de un evento incluyendo signups."""
 
+    BINDINGS = [("escape", "dismiss", "Cerrar")]
 
     def __init__(self, evento: dict):
         super().__init__()
         self.evento = evento
 
-    def compose(self) -> ComposeResult:
-        ev    = self.evento
-        fecha = datetime.fromtimestamp(int(ev.get("unixtime", 0))).strftime('%d/%m/%Y %H:%M')
-        desc  = ev.get("description", "Sin descripción") or "Sin descripción"
+    def on_mount(self) -> None:
+        self.focus()
+        # Cargamos el detalle completo en hilo separado
+        self.cargar_detalle()
 
-        contenido = (
-            f"[bold cyan]{ev.get('displayTitle', ev.get('title', 'Sin título'))}[/bold cyan]\n\n"
-            f"[bold]Servidor:[/bold]  {ev.get('_servidor', '?')}\n"
+    @work(thread=True)
+    def cargar_detalle(self) -> None:
+        from api import obtener_detalle_evento
+        raid_id = self.evento.get("raidId", "")
+        if not raid_id:
+            return
+        detalle = obtener_detalle_evento(raid_id)
+        self.app.call_from_thread(self._renderizar, detalle)
+
+    def _renderizar(self, detalle: dict) -> None:
+        fecha = datetime.fromtimestamp(
+            int(detalle.get("unixtime", 0))
+        ).strftime('%d/%m/%Y %H:%M')
+
+        desc = detalle.get("description") or "Sin descripción"
+
+        # --- Cabecera del evento ---
+        texto = (
+            f"[bold cyan]{'='*55}[/bold cyan]\n"
+            f"[bold white] {detalle.get('displayTitle', detalle.get('title', '?'))}[/bold white]\n"
+            f"[bold cyan]{'='*55}[/bold cyan]\n\n"
+            f"[bold]Servidor:[/bold]  {detalle.get('servername', '?')}\n"
             f"[bold]Fecha:[/bold]     {fecha}\n"
-            f"[bold]Líder:[/bold]     {ev.get('leader', '?')}\n"
-            f"[bold]Anotados:[/bold]  {ev.get('signupcount', '?')}\n"
-            f"[bold]Canal:[/bold]     #{ev.get('channelName', '?')}\n"
-            f"[bold]Raid ID:[/bold]   {ev.get('raidId', '?')}\n\n"
-            f"[bold]Descripción:[/bold]\n{desc}\n\n"
-            f"[dim]ESC para cerrar[/dim]"
+            f"[bold]Líder:[/bold]     {detalle.get('leadername', '?')}\n"
+            f"[bold]Canal:[/bold]     #{detalle.get('channelName', '?')}\n"
+            f"[bold]Raid ID:[/bold]   {detalle.get('raidid', '?')}\n\n"
+            f"[bold]Descripción:[/bold]\n[dim]{desc}[/dim]\n\n"
         )
 
-        yield Container(Static(contenido, markup=True), id="modal-cuerpo")
+        # --- Signups agrupados por rol ---
+        signups = detalle.get("signups", [])
+        if signups:
+            COLORES = {
+                "Tanks":   "bold blue",
+                "Healers": "bold green",
+                "Melee":   "bold red",
+                "Ranged":  "bold yellow",
+            }
+
+            grupos = {}
+            for s in signups:
+                if s.get("status") != "primary":
+                    continue
+                rol = s.get("role", "Otros")
+                grupos.setdefault(rol, []).append(s)
+
+            for rol in ["Tanks", "Healers", "Melee", "Ranged"]:
+                if rol not in grupos:
+                    continue
+                color = COLORES.get(rol, "white")
+                miembros = sorted(grupos[rol], key=lambda x: x.get("position", 99))
+                texto += f"[{color}]── {rol} ({len(miembros)}) ──[/{color}]\n"
+                for m in miembros:
+                    nombre = m.get("name", "?")
+                    clase  = m.get("class", "")
+                    spec   = m.get("spec", "")
+                    nota   = f"  [dim]({m['note']})[/dim]" if m.get("note") else ""
+                    texto += f"  {m.get('position','?'):>2}. [white]{nombre}[/white]  [dim]{clase} / {spec}[/dim]{nota}\n"
+                texto += "\n"
+
+            # Bench / Tentative / Ausentes si hay
+            for estado in ["Bench", "Tentative", "Late", "Absence"]:
+                extras = [s for s in signups if s.get("status") == "default"
+                          and s.get("class", "").lower() == estado.lower()]
+                if extras:
+                    texto += f"[dim]── {estado} ({len(extras)}) ──[/dim]\n"
+                    for m in extras:
+                        texto += f"  [dim]{m.get('name', '?')}[/dim]\n"
+                    texto += "\n"
+
+            total = len([s for s in signups if s.get("status") == "primary"])
+            texto += f"[bold cyan]Total anotados: {total}[/bold cyan]\n\n"
+        else:
+            texto += "[dim]Sin anotados aún.[/dim]\n\n"
+
+        texto += "[dim]ESC para cerrar[/dim]"
+
+        try:
+            self.query_one("#cargando", Static).update(texto)
+        except Exception:
+            pass
+
+    def compose(self) -> ComposeResult:
+        titulo = self.evento.get("displayTitle", self.evento.get("title", "Evento"))
+        yield Container(
+            Static(f"⏳ Cargando {titulo}...", id="cargando", markup=True),
+            id="modal-cuerpo"
+        )
 
     DEFAULT_CSS = """
     DetalleEventoModal {
         align: center middle;
     }
     #modal-cuerpo {
-        width: 70%;
-        max-height: 80%;
+        width: 75%;
+        max-height: 85%;
         background: $surface;
         border: thick $primary;
         padding: 2 4;

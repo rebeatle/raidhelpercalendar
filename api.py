@@ -48,3 +48,17 @@ def obtener_mi_agenda() -> list:
         return []
     except Exception:
         return []
+    
+    
+def obtener_detalle_evento(raid_id: str) -> dict:
+    """Obtiene el detalle completo de un evento incluyendo signups."""
+    try:
+        res = requests.post(
+            f"https://raid-helper.xyz/api/event/{raid_id}",
+            json={"accessToken": ACCESS_TOKEN},
+            timeout=10
+        )
+        res.raise_for_status()
+        return res.json()
+    except Exception:
+        return {}
