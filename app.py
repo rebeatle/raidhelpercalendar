@@ -124,15 +124,15 @@ class DetalleEventoModal(ModalScreen):
             Static(f"⏳ Cargando {titulo}...", id="cargando", markup=True),
             id="modal-cuerpo"
         )
-        with Horizontal(id="barra-filtros"):
-            yield Label(" Período: ")
-            yield Select(options=OPCIONES_DIAS, value="7", id="sel-dias")
-            yield Label("Servidor: ")
-            yield Select(options=[("Todos", "")], value="", id="sel-servidor")
-            yield Label("Buscar: ")
-            yield Input(placeholder="título, servidor, líder...", id="inp-buscar")
-            yield Static("Iniciando...", id="estado")
+    def action_abrir_config(self) -> None:
+        """Abre el menú de configuración en una terminal nueva."""
+        import subprocess
+        subprocess.Popen(["python", "setup.py", "menu"])
 
+    def action_agregar_servers(self) -> None:
+        """Abre el menú para agregar servidores en una terminal nueva."""
+        import subprocess
+        subprocess.Popen(["python", "setup.py", "agregar"])
     DEFAULT_CSS = """
     DetalleEventoModal {
         align: center middle;
@@ -154,10 +154,11 @@ class RaidHelperApp(App):
     SUB_TITLE = "Ken's Raid Tracker"
 
     BINDINGS = [
-        Binding("q",      "quit",        "Salir"),
-        Binding("r",      "recargar",    "Recargar"),
-        Binding("enter",  "ver_detalle", "Ver detalle"),
-    ]
+    Binding("q", "quit",            "Salir"),
+    Binding("r", "recargar",        "Recargar"),
+    Binding("c", "abrir_config",    "Configuración"),
+    Binding("v", "agregar_servers", "Agregar servidores"),
+]
 
     DEFAULT_CSS = """
     #barra-filtros {
@@ -209,6 +210,8 @@ class RaidHelperApp(App):
             yield Select(options=OPCIONES_DIAS, value="7", id="sel-dias")
             yield Label("Servidor: ")
             yield Select(options=[("Todos", "")], value="", id="sel-servidor")
+            yield Label("Buscar: ")
+            yield Input(placeholder="título, servidor, líder...", id="inp-buscar")
             yield Static("Iniciando...", id="estado")
 
         with Container(id="contenedor-tabla"):
@@ -249,11 +252,11 @@ class RaidHelperApp(App):
         try:
             tabla = self.query_one("#tabla", DataTable)
             tabla.clear(columns=True)
-            tabla.add_columns("✅✅Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
         except Exception:
             tabla = DataTable(id="tabla", cursor_type="row")
             self.query_one("#contenedor-tabla").mount(tabla)
-            tabla.add_columns("✅Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
 
         self._aplicar_filtros()
             
@@ -303,11 +306,11 @@ class RaidHelperApp(App):
             serv  = Text(ev.get("_servidor", "?")[:22], style=color)
             tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
             anot  = Text(str(ev.get("signupcount", "?")), style=color)
-            mark  = Text("✅" if ev.get("_anotado") else "  ", style=color)
+            mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
 
             tabla.add_row(mark, fecha, hora, serv, tit, anot)
 
-        self._set_estado(f"✅ {len(eventos)} evento(s)")
+        self._set_estado(f"READY {len(eventos)} evento(s)")
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:
