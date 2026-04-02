@@ -125,14 +125,14 @@ class DetalleEventoModal(ModalScreen):
             id="modal-cuerpo"
         )
     def action_abrir_config(self) -> None:
-        """Abre el menú de configuración en una terminal nueva."""
-        import subprocess
-        subprocess.Popen(["python", "setup.py", "menu"])
+        """Cierra la app y abre el menú de configuración."""
+        self.exit(return_code=2)
 
     def action_agregar_servers(self) -> None:
-        """Abre el menú para agregar servidores en una terminal nueva."""
-        import subprocess
-        subprocess.Popen(["python", "setup.py", "agregar"])
+        """Cierra la app y abre agregar servidores."""
+        self.exit(return_code=3)
+    
+    
     DEFAULT_CSS = """
     DetalleEventoModal {
         align: center middle;

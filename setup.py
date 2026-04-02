@@ -281,25 +281,29 @@ def menu_configuracion():
             sys.exit(0)
 
 def primer_arranque():
-    """Flujo guiado para la primera vez."""
+    """Flujo guiado — solo pide lo que falta."""
     limpiar()
     encabezado()
     print("""
   ¡Bienvenido a RaidHelper Dashboard!
   
-  Es la primera vez que ejecutas la app.
-  Vamos a configurar todo en 3 pasos rápidos.
+  Vamos a configurar lo que falta.
 """)
     pausar()
 
-    configurar_access_token()
-    configurar_user_api_key()
-    configurar_servidores()
+    if not os.path.exists('api.txt'):
+        configurar_access_token()
+    
+    if not os.path.exists('api_key.txt'):
+        configurar_user_api_key()
+    
+    if not os.path.exists('servers.txt'):
+        configurar_servidores()
 
     limpiar()
     encabezado()
     print("""
-  ✅ ¡Configuración completada!
+  ✅ ¡Todo configurado!
   
   La app se abrirá ahora.
   

@@ -23,6 +23,8 @@ if errorlevel 1 (
 
 :: --- Crear acceso directo en el escritorio la primera vez ---
 if not exist "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" (
+    set "RUTA_BAT=%~dp0launcher.bat"
+    set "RUTA_DIR=%~dp0"
     echo Set oWS = WScript.CreateObject("WScript.Shell") > "%TEMP%\crearacceso.vbs"
     echo sLinkFile = "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" >> "%TEMP%\crearacceso.vbs"
     echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%TEMP%\crearacceso.vbs"
@@ -44,10 +46,14 @@ goto launch
 python setup.py auto
 if errorlevel 1 exit /b
 
+:: --- Si la app termina con código especial, abrir menú ---
 :launch
 python app.py
 
-:: --- Si la app termina con código especial, abrir menú ---
+if errorlevel 3 (
+    python setup.py agregar
+    goto launch
+)
 if errorlevel 2 (
     python setup.py menu
     goto launch
