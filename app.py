@@ -5,6 +5,9 @@ from textual.screen import ModalScreen
 from textual.binding import Binding
 from textual import work, on
 from datetime import datetime
+from rich.text import Text
+from datetime import datetime, date
+from textual.widgets import Input  
 
 from api import obtener_todos_los_eventos
 from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos
@@ -25,6 +28,7 @@ class DetalleEventoModal(ModalScreen):
     def __init__(self, evento: dict):
         super().__init__()
         self.evento = evento
+        self._filtro_texto = ""
 
     def on_mount(self) -> None:
         self.focus()
@@ -113,12 +117,21 @@ class DetalleEventoModal(ModalScreen):
         except Exception:
             pass
 
+        
     def compose(self) -> ComposeResult:
         titulo = self.evento.get("displayTitle", self.evento.get("title", "Evento"))
         yield Container(
             Static(f"⏳ Cargando {titulo}...", id="cargando", markup=True),
             id="modal-cuerpo"
         )
+        with Horizontal(id="barra-filtros"):
+            yield Label(" Período: ")
+            yield Select(options=OPCIONES_DIAS, value="7", id="sel-dias")
+            yield Label("Servidor: ")
+            yield Select(options=[("Todos", "")], value="", id="sel-servidor")
+            yield Label("Buscar: ")
+            yield Input(placeholder="título, servidor, líder...", id="inp-buscar")
+            yield Static("Iniciando...", id="estado")
 
     DEFAULT_CSS = """
     DetalleEventoModal {
@@ -169,6 +182,10 @@ class RaidHelperApp(App):
     DataTable {
         height: 1fr;
     }
+    Input {
+    width: 25;
+    margin: 0 1;
+    }
     """
 
     def __init__(self):
@@ -176,8 +193,14 @@ class RaidHelperApp(App):
         self._todos_eventos     = []
         self._eventos_filtrados = []
         self._filtro_dias       = "7"
-        self._filtro_servidor   = ""
-
+        self._filtro_texto = ""
+        
+    @on(Input.Changed, "#inp-buscar")
+    def cambio_busqueda(self, event: Input.Changed) -> None:
+        self._filtro_texto = event.value
+        self._aplicar_filtros()
+        
+        
     def compose(self) -> ComposeResult:
         yield Header()
 
@@ -237,33 +260,54 @@ class RaidHelperApp(App):
 
 
     def _aplicar_filtros(self) -> None:
-        """Filtra los eventos y refresca la tabla."""
         try:
             tabla = self.query_one("#tabla", DataTable)
         except Exception:
             return
 
+        from filtros import filtrar_por_texto
+
         eventos = list(self._todos_eventos)
 
         if self._filtro_dias != "0":
             eventos = filtrar_por_dias(eventos, int(self._filtro_dias))
-
         if self._filtro_servidor:
             eventos = filtrar_por_servidor(eventos, self._filtro_servidor)
+        if self._filtro_texto:
+            eventos = filtrar_por_texto(eventos, self._filtro_texto)
 
         self._eventos_filtrados = eventos
         tabla.clear()
 
-        for ev in eventos:
-            fecha    = datetime.fromtimestamp(int(ev["unixtime"])).strftime('%d/%m/%Y')
-            hora     = ev.get("time", "??:??")
-            servidor = ev.get("_servidor", "?")[:22]
-            titulo   = ev.get("displayTitle", ev.get("title", "Sin título"))[:32]
-            anotados = str(ev.get("signupcount", "?"))
-            anotado  = "x" if ev.get("_anotado") else "  "
-            tabla.add_row(anotado, fecha, hora, servidor, titulo, anotados)
+        hoy      = date.today()
+        manana   = hoy.toordinal() + 1
+        semana   = hoy.toordinal() + 7
 
-        self._set_estado(f"x {len(eventos)} evento(s)")
+        for ev in eventos:
+            dt       = datetime.fromtimestamp(int(ev["unixtime"]))
+            ord_ev   = dt.date().toordinal()
+
+            # --- Color según proximidad ---
+            if ord_ev == hoy.toordinal():
+                color = "bold red"        # hoy
+            elif ord_ev == manana:
+                color = "bold yellow"     # mañana
+            elif ord_ev <= semana:
+                color = "bold green"      # esta semana
+            else:
+                color = "white"           # más lejos
+
+            DIAS  = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"]
+            fecha = Text(f"{DIAS[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
+            hora  = Text(ev.get("time", "??:??"), style=color)
+            serv  = Text(ev.get("_servidor", "?")[:22], style=color)
+            tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
+            anot  = Text(str(ev.get("signupcount", "?")), style=color)
+            mark  = Text("✅" if ev.get("_anotado") else "  ", style=color)
+
+            tabla.add_row(mark, fecha, hora, serv, tit, anot)
+
+        self._set_estado(f"✅ {len(eventos)} evento(s)")
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:

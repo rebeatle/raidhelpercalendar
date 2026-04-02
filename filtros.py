@@ -19,3 +19,15 @@ def filtrar_por_servidor(eventos: list, nombre_servidor: str) -> list:
 def obtener_servidores_unicos(eventos: list) -> list:
     """Retorna lista de nombres de servidores únicos, ordenada."""
     return sorted(set(ev.get("_servidor", "?") for ev in eventos))
+
+
+def filtrar_por_texto(eventos: list, texto: str) -> list:
+    """Filtra eventos por texto libre en título, servidor o líder."""
+    if not texto:
+        return eventos
+    busqueda = texto.lower()
+    return [
+        ev for ev in eventos
+        if busqueda in ev.get("displayTitle", ev.get("title", "")).lower()
+        or busqueda in ev.get("_servidor", "").lower()
+        or busqueda in ev.get("leader", "").lower() ]
