@@ -346,6 +346,15 @@ class RaidHelperApp(App):
         """Cierra la app y abre agregar servidores."""
         self.exit(return_code=3)
 
+    def action_abrir_config(self) -> None:
+        with open('.exit_code', 'w') as f:
+            f.write('2')
+        self.exit()
+
+    def action_agregar_servers(self) -> None:
+        with open('.exit_code', 'w') as f:
+            f.write('3')
+        self.exit()
 
 if __name__ == "__main__":
     RaidHelperApp().run()

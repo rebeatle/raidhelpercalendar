@@ -1,7 +1,8 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-:: --- Launcher actualizado ver2 ---
+:: --- Launcher actualizado ver3 ---
+
 :: --- Verificar Python ---
 python --version >nul 2>&1
 if errorlevel 1 (
@@ -21,40 +22,33 @@ if errorlevel 1 (
     pip install textual requests -q
 )
 
-:: --- Crear acceso directo en el escritorio la primera vez ---
-if not exist "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" (
-    set "RUTA_BAT=%~dp0launcher.bat"
-    set "RUTA_DIR=%~dp0"
-    echo Set oWS = WScript.CreateObject("WScript.Shell") > "%TEMP%\crearacceso.vbs"
-    echo sLinkFile = "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" >> "%TEMP%\crearacceso.vbs"
-    echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%TEMP%\crearacceso.vbs"
-    echo oLink.TargetPath = "%~dp0launcher.bat" >> "%TEMP%\crearacceso.vbs"
-    echo oLink.WorkingDirectory = "%~dp0" >> "%TEMP%\crearacceso.vbs"
-    echo oLink.Description = "RaidHelper Dashboard" >> "%TEMP%\crearacceso.vbs"
-    echo oLink.Save >> "%TEMP%\crearacceso.vbs"
-    cscript //nologo "%TEMP%\crearacceso.vbs"
-    del "%TEMP%\crearacceso.vbs"
-    echo  ✅ Acceso directo creado en el escritorio.
-)
-
-:: --- Verificar configuración y lanzar ---
+:: --- Verificar configuración ---
 if not exist "api.txt" goto setup
+if not exist "api_key.txt" goto setup
 if not exist "servers.txt" goto setup
 goto launch
 
 :setup
 python setup.py auto
-if errorlevel 1 exit /b
+goto launch
 
-:: --- Si la app termina con código especial, abrir menú ---
+:: --- Bucle principal ---
 :launch
+if exist ".exit_code" del ".exit_code"
 python app.py
 
-if errorlevel 3 (
+if not exist ".exit_code" goto fin
+
+set /p EXIT_CODE=<.exit_code
+del ".exit_code"
+
+if "%EXIT_CODE%"=="3" (
     python setup.py agregar
     goto launch
 )
-if errorlevel 2 (
+if "%EXIT_CODE%"=="2" (
     python setup.py menu
     goto launch
 )
+
+:fin

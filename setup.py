@@ -134,6 +134,7 @@ def configurar_servidores():
     print("  ¿Cómo quieres ingresar los IDs?")
     print("  [1] Uno por uno")
     print("  [2] Desde un archivo .txt (un ID por línea)")
+    print("  Presiona ENTER 2 veces para salir ")
     print()
     opcion = input("  Elige una opción (1 o 2): ").strip()
 
@@ -162,6 +163,7 @@ def ingresar_ids_manual() -> list:
     ids = []
     print("\n  Ingresa los IDs uno por uno.")
     print("  (Deja vacío y presiona Enter cuando termines)\n")
+    print("  Presiona ENTER 2 veces para salir ")
     while True:
         id_srv = input(f"  Servidor #{len(ids)+1} (o Enter para terminar): ").strip()
         if not id_srv:
@@ -213,6 +215,7 @@ def agregar_servidores():
     print("  [1] Uno por uno")
     print("  [2] Desde un archivo .txt")
     print()
+    print("  Presiona ENTER 2 veces para salir ")
     opcion = input("  Elige una opción (1 o 2): ").strip()
 
     nuevos = []
