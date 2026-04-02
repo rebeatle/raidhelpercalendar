@@ -173,6 +173,17 @@ en la API de Raid Helper, abre un issue.
 
 ---
 
+
 ## Licencia
 
-MIT — úsalo, modifícalo, compártelo.
+Este proyecto está bajo la licencia **GNU GPL v3**.
+
+Puedes usar, estudiar y modificar el código libremente, pero cualquier
+versión modificada que distribuyas debe:
+- Ser también de código abierto bajo GPL v3
+- Dar crédito al autor original
+- **No puede ser vendida ni usada con fines comerciales** sin permiso explícito del autor
+
+© 2026 [rebeatle](https://github.com/rebeatle) — All rights reserved under GPL v3.
+
+Para uso comercial o acuerdos especiales, contacta al autor directamente.
