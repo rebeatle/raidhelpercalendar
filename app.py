@@ -211,24 +211,29 @@ class RaidHelperApp(App):
             pass
 
     def _construir_tabla(self, eventos: list) -> None:
-        """Construye la DataTable una vez que los datos están listos."""
         # Actualizar opciones de servidores
         servidores = obtener_servidores_unicos(eventos)
         opciones   = [("Todos los servidores", "")] + [(s, s) for s in servidores]
         self.query_one("#sel-servidor", Select).set_options(opciones)
 
-        # Reemplazar LoadingIndicator por DataTable
+        # Eliminar LoadingIndicator si todavía existe
         try:
             self.query_one(LoadingIndicator).remove()
         except Exception:
             pass
 
-        tabla = DataTable(id="tabla", cursor_type="row")
-        self.query_one("#contenedor-tabla").mount(tabla)
-        tabla.add_columns("Fecha", "Hora", "Servidor", "Raid", "👥")
+        # Si la tabla ya existe, la reutilizamos — si no, la creamos    
+        try:
+            tabla = self.query_one("#tabla", DataTable)
+            tabla.clear(columns=True)
+            tabla.add_columns("✅✅Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+        except Exception:
+            tabla = DataTable(id="tabla", cursor_type="row")
+            self.query_one("#contenedor-tabla").mount(tabla)
+            tabla.add_columns("✅Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
 
         self._aplicar_filtros()
-        
+            
 
 
     def _aplicar_filtros(self) -> None:
@@ -255,9 +260,10 @@ class RaidHelperApp(App):
             servidor = ev.get("_servidor", "?")[:22]
             titulo   = ev.get("displayTitle", ev.get("title", "Sin título"))[:32]
             anotados = str(ev.get("signupcount", "?"))
-            tabla.add_row(fecha, hora, servidor, titulo, anotados)
+            anotado  = "x" if ev.get("_anotado") else "  "
+            tabla.add_row(anotado, fecha, hora, servidor, titulo, anotados)
 
-        self._set_estado(f"✅ {len(eventos)} evento(s)")
+        self._set_estado(f"x {len(eventos)} evento(s)")
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:
