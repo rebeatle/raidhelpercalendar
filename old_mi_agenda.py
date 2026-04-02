@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 import time
-
+# Agregando a gitignore
 # --- CONFIGURACIÓN ---
 # Abre el archivo y guarda el contenido en la variable 'contenido'
 with open('api_key.txt', 'r', encoding='utf-8') as archivo:

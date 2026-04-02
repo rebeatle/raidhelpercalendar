@@ -5,3 +5,5 @@ cookie.txt
 __pycache__/api.cpython-311.pyc
 __pycache__/config.cpython-311.pyc
 __pycache__/filtros.cpython-311.pyc
+old_main.py
+old_mi_agenda.py

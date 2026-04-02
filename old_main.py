@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import time
 import json
-
+# Agregando a gitignore
 # --- CONFIGURACIÓN ---
 with open('api.txt', 'r', encoding='utf-8') as f:
     ACCESS_TOKEN = f.read().strip()
