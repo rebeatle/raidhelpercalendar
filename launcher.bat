@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-
+:: --- Launcher actualizado ver2 ---
 :: --- Verificar Python ---
 python --version >nul 2>&1
 if errorlevel 1 (
