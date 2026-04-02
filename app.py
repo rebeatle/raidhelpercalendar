@@ -124,13 +124,7 @@ class DetalleEventoModal(ModalScreen):
             Static(f"⏳ Cargando {titulo}...", id="cargando", markup=True),
             id="modal-cuerpo"
         )
-    def action_abrir_config(self) -> None:
-        """Cierra la app y abre el menú de configuración."""
-        self.exit(return_code=2)
 
-    def action_agregar_servers(self) -> None:
-        """Cierra la app y abre agregar servidores."""
-        self.exit(return_code=3)
     
     
     DEFAULT_CSS = """
@@ -343,6 +337,14 @@ class RaidHelperApp(App):
         """Recarga todos los datos desde la API."""
         self._set_estado("⏳ Recargando...")
         self.cargar_datos()
+
+    def action_abrir_config(self) -> None:
+        """Cierra la app y abre el menú de configuración."""
+        self.exit(return_code=2)
+
+    def action_agregar_servers(self) -> None:
+        """Cierra la app y abre agregar servidores."""
+        self.exit(return_code=3)
 
 
 if __name__ == "__main__":
