@@ -1,189 +1,189 @@
-# ⚔ Raid Helper View (RHV)
+# Spanish Version 
 
-Un dashboard de escritorio para visualizar todos tus eventos de Raid Helper
-en múltiples servidores de Discord desde una sola pantalla.
+> 🌐 [Versión en español](README.es.md)
 
-> Construido por [rebeatle](https://github.com/rebeatle) — porque saltar entre
-> 14 canales de Discord para ver el calendario es un raid en sí mismo.
-
----
-
-## ¿Qué es esto?
-
-Si usas Raid Helper en varios servidores de Discord, sabes el dolor de tener
-que revisar canal por canal para ver qué raids están programadas.
-
-RHV resuelve eso: una sola pantalla con todos tus eventos futuros, filtros,
-colores por proximidad de fecha, y la marca de en cuáles ya estás anotado.
+# ⚔ Raid Helper Viewer (RHV)
 
 
-![Vista principal](screenshots/main_view.png)
-![launcher ](screenshots/intro_2.png)
----
 
-## Características
+A desktop dashboard to visualize all your Raid Helper events
+across multiple Discord servers from a single screen.
 
-- 📅 **Vista unificada** de eventos de múltiples servidores
-- 🔴🟡🟢 **Colores por proximidad** — hoy, mañana, esta semana
-- ✅ **Marca tus eventos** — saber de un vistazo dónde ya estás anotado
-- 🔍 **Filtros** por período, servidor y texto libre
-- 📋 **Detalle completo** de cada evento con signups por rol (Tanks, Healers, Melee, Ranged)
-- ⌨️ **100% teclado y Mouse** — navegación rápida con teclado y Mouse
+> Built by [rebeatle](https://github.com/rebeatle) — because jumping between
+> 14 Discord channels just to check the calendar is a raid by itself.
 
 ---
 
-## Requisitos
+## What is this?
 
-- Windows 10 o superior
-- Python 3.10+ → [descargar aquí](https://www.python.org/downloads/)
-  - ⚠️ Al instalar, marca **"Add Python to PATH"**
-- Cuenta de Discord con acceso a servidores que usen Raid Helper
+If you use Raid Helper across multiple Discord servers, you know the pain of
+having to check channel by channel to see what raids are scheduled.
 
+RHV solves that: a single screen with all your upcoming events, filters,
+color coding by date proximity, and a mark showing which ones you're already signed up for.
+
+![Main view](screenshots/main_view.png)
+![launcher](screenshots/intro_2.png)
 
 ---
 
-## Instalación
+## Features
 
-1. Descarga el repositorio como ZIP y extráelo en tu escritorio
-2. Abre la carpeta y haz doble click en **`launcher.bat`**
-3. El launcher instala las dependencias automáticamente y te guía en la configuración
+- 📅 **Unified view** of events from multiple servers
+- 🔴🟡🟢 **Color by proximity** — today, tomorrow, this week
+- ✅ **Mark your events** — instantly see where you're already signed up
+- 🔍 **Filters** by period, server, and free text
+- 📋 **Full event details** with role signups (Tanks, Healers, Melee, Ranged)
+- ⌨️ **100% keyboard and mouse** — fast navigation
 
-![launcher ](screenshots/rhv_intro.png)
 ---
-Si eres usuario avanzado te recomiendo crear un .env e instalar estas dependencias.
+
+## Requirements
+
+- Windows 10 or higher
+- Python 3.10+ → [download here](https://www.python.org/downloads/)
+  - ⚠️ During installation, check **"Add Python to PATH"**
+- Discord account with access to servers using Raid Helper
+
+---
+
+## Installation
+
+1. Download the repository as a ZIP and extract it to your desktop
+2. Open the folder and double-click **`launcher.bat`**
+3. The launcher installs dependencies automatically and guides you through setup
+
+![launcher](screenshots/rhv_intro.png)
+
+---
+
+If you are an advanced user, it is recommended to create a `.env` and install these dependencies:
     pip install -r requirements.txt
 
     textual>=0.8.0
     requests>=2.28.0
 
- Caso contrario solo descarga los archivos y ponlos en tu escritorio. No olvides instalar Python. El launcher hara todo de forma automatica.
-
+Otherwise, just download the files and place them on your desktop. Don’t forget to install Python. The launcher will handle everything automatically.
 
 ---
 
+## Initial Setup
 
-## Configuración inicial
-
-El launcher te pedirá 3 cosas la primera vez:
+The launcher will ask you for 3 things the first time:
 
 ### 1. Access Token
-Este es el token de tu sesión en raid-helper.xyz. Para obtenerlo:
+This is your session token from raid-helper.xyz. To obtain it:
 
-1. Ve a [raid-helper.xyz](https://raid-helper.xyz) e inicia sesión con Discord
-2. Una vez dentro, ve al calendario de cualquier servidor
-3. Presiona `F12` para abrir DevTools
-4. Ve a la pestaña **Red** (Network) y filtra por **Fetch/XHR**
-5. Recarga la página con `F5`
-6. Busca una llamada llamada **`events/`** en la lista
-7. Haz click y ve a la pestaña **Carga útil** (Payload)
-8. Verás algo como:
+1. Go to [raid-helper.xyz](https://raid-helper.xyz) and log in with Discord
+2. Once inside, open the calendar of any server
+3. Press `F12` to open DevTools
+4. Go to the **Network** tab and filter by **Fetch/XHR**
+5. Reload the page with `F5`
+6. Look for a call named **`events/`**
+7. Click it and go to the **Payload** tab
+8. You will see something like:
 ```json
-   {"serverid":"...","accessToken":"TU_TOKEN_AQUÍ"}
+{"serverid":"...","accessToken":"YOUR_TOKEN_HERE"}
 ```
 ![f12](screenshots/f12.png)
-9. Copia solo el valor del `accessToken` (la cadena larga)
+9. Copy only the value of `accessToken` (the long string)
 
-> ⚠️ Este token es personal — no lo compartas con nadie.
-> Expira con el tiempo. Si la app deja de mostrar eventos, repite este proceso
-> y actualiza tu `api.txt` con el nuevo token (opción C → Configuración).
+> ⚠️ This token is personal — do not share it with anyone.
+> It expires over time. If the app stops showing events, repeat this process
+> and update your `api.txt` with the new token (option C → Settings).
 
-### 2. User API Key *(opcional)*
-Permite marcar con ✅ los eventos donde ya estás anotado.
+### 2. User API Key *(optional)*
+Allows marking events with ✅ where you're already signed up.
 
-1. En Discord, busca al bot **Raid-Helper** en cualquier servidor
-2. Envíale un mensaje directo con el comando: `/usersettings apikey show`
-3. Copia la key que te responde
+1. In Discord, find the **Raid-Helper** bot in any server
+2. Send it a direct message with: `/usersettings apikey show`
+3. Copy the key it returns
 
-Si no la configuras, la app funciona igual pero sin la marca de anotado.
+If you don’t configure it, the app still works but without signup marks.
 
-### 3. IDs de servidores de Discord
-Los servidores donde tienes Raid Helper activo.
+### 3. Discord Server IDs
+The servers where you have Raid Helper active.
 
-**¿Cómo obtener el ID de un servidor?**
-1. En Discord, activa el Modo desarrollador:
-   `Ajustes → Avanzado → Modo desarrollador ✅`
-2. Haz click derecho en el servidor
-3. Selecciona **Copiar ID del servidor**
+**How to get a server ID?**
+1. In Discord, enable Developer Mode:
+   `Settings → Advanced → Developer Mode ✅`
+2. Right-click the server
+3. Select **Copy Server ID**
 
-Puedes ingresarlos uno por uno o desde un archivo `.txt` con un ID por línea.
-![dev mode ](screenshots/dev_mode.png)
-![Ids server ](screenshots/id_server.png)
----
+You can enter them one by one or from a `.txt` file with one ID per line.
 
-## Controles
-
-| Tecla | Acción |
-|-------|--------|
-| `↑` `↓` | Navegar por los eventos |
-| `Enter` | Ver detalle completo del evento |
-| `R` | Recargar datos desde la API |
-| `C` | Abrir menú de configuración |
-| `V` | Agregar más servidores |
-| `Esc` | Cerrar ventana de detalle |
-| `Q` | Salir |
+![dev mode](screenshots/dev_mode.png)
+![Ids server](screenshots/id_server.png)
 
 ---
 
-## Colores
+## Controls
 
-| Color | Significado |
-|-------|-------------|
-| 🔴 Rojo | El evento es hoy |
-| 🟡 Amarillo | El evento es mañana |
-| 🟢 Verde | El evento es esta semana |
-| ⚪ Blanco | El evento es más adelante |
+| Key | Action |
+|-----|--------|
+| `↑` `↓` | Navigate events |
+| `Enter` | View full event details |
+| `R` | Reload data from API |
+| `C` | Open settings menu |
+| `V` | Add more servers |
+| `Esc` | Close detail window |
+| `Q` | Exit |
+
+---
+
+## Colors
+
+| Color | Meaning |
+|-------|---------|
+| 🔴 Red | Event is today |
+| 🟡 Yellow | Event is tomorrow |
+| 🟢 Green | Event is this week |
+| ⚪ White | Event is later |
 
 ---
 
 ## FAQ
 
-**¿Por qué la app no muestra eventos?**
-Lo más probable es que tu Access Token haya expirado. Ve a Configuración
-(`C`) → opción 1, y sigue los pasos para obtener un nuevo token.
+**Why isn’t the app showing events?**
+Most likely your Access Token has expired. Go to Settings (`C`) → option 1, and follow the steps to get a new token.
 
-**¿Por qué no veo el ✅ en mis eventos?**
-Necesitas configurar la User API Key. Ve a Configuración (`C`) → opción 2.
+**Why don’t I see the ✅ on my events?**
+You need to configure the User API Key. Go to Settings (`C`) → option 2.
 
-**¿Funciona en Mac o Linux?**
-El `launcher.bat` es exclusivo de Windows. En Mac/Linux puedes correr
-`python app.py` directamente desde la terminal, pero el flujo de configuración
-hay que hacerlo manual por ahora.
+**Does it work on Mac or Linux?**
+`launcher.bat` is Windows-only. On Mac/Linux you can run
+`python app.py` directly from the terminal, but setup must be done manually for now.
 
-**¿Es oficial? ¿Tiene permiso de Raid Helper?**
-No es un producto oficial de Raid Helper. Usa la misma API que usa el
-frontend de raid-helper.xyz con tu sesión personal. Cada usuario autentica
-con sus propias credenciales. Si Raid Helper cambia su API, puede dejar
-de funcionar hasta que se actualice el proyecto.
+**Is it official? Does it have Raid Helper permission?**
+This is not an official Raid Helper product. It uses the same API as the
+raid-helper.xyz frontend with your personal session. Each user authenticates
+with their own credentials. If Raid Helper changes its API, it may stop working until updated.
 
 ---
 
-## Notas técnicas
+## Technical Notes
 
-RHV replica las llamadas que hace el frontend de raid-helper.xyz usando
-el `accessToken` de sesión OAuth de Discord. No existe una API pública
-documentada para esto — fue descubierto observando el tráfico de red del
-sitio web oficial.
-
----
-
-## Contribuciones
-
-Pull requests bienvenidos. Si encuentras que algo se rompió por un cambio
-en la API de Raid Helper, abre un issue.
+RHV replicates the calls made by the raid-helper.xyz frontend using
+the Discord OAuth session `accessToken`. There is no publicly documented API —
+this was discovered by observing the network traffic of the official website.
 
 ---
 
+## Contributions
 
-## Licencia
+Pull requests are welcome. If something breaks due to changes in the Raid Helper API, open an issue.
 
-Este proyecto está bajo la licencia **GNU GPL v3**.
+---
 
-Puedes usar, estudiar y modificar el código libremente, pero cualquier
-versión modificada que distribuyas debe:
-- Ser también de código abierto bajo GPL v3
-- Dar crédito al autor original
-- **No puede ser vendida ni usada con fines comerciales** sin permiso explícito del autor
+## License
+
+This project is licensed under **GNU GPL v3**.
+
+You are free to use, study, and modify the code, but any distributed modified version must:
+- Also be open source under GPL v3
+- Give credit to the original author
+- **Not be sold or used commercially** without explicit permission from the author
 
 © 2026 [rebeatle](https://github.com/rebeatle) — All rights reserved under GPL v3.
 
-Para uso comercial o acuerdos especiales, contacta al autor directamente.
+For commercial use or special agreements, contact the author directly.
