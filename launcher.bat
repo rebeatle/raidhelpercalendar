@@ -23,20 +23,16 @@ if errorlevel 1 (
 
 :: --- Crear acceso directo en el escritorio la primera vez ---
 if not exist "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" (
-    python -c "
-import os, winreg
-from pathlib import Path
-try:
-    import win32com.client
-    shell    = win32com.client.Dispatch('WScript.Shell')
-    shortcut = shell.CreateShortcut(str(Path.home() / 'Desktop' / 'RaidHelper Dashboard.lnk'))
-    shortcut.TargetPath  = os.path.abspath('launcher.bat')
-    shortcut.WorkingDirectory = os.path.abspath('.')
-    shortcut.IconLocation = '%SystemRoot%\\system32\\cmd.exe'
-    shortcut.Save()
-except:
-    pass
-"
+    echo Set oWS = WScript.CreateObject("WScript.Shell") > "%TEMP%\crearacceso.vbs"
+    echo sLinkFile = "%USERPROFILE%\Desktop\RaidHelper Dashboard.lnk" >> "%TEMP%\crearacceso.vbs"
+    echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%TEMP%\crearacceso.vbs"
+    echo oLink.TargetPath = "%~dp0launcher.bat" >> "%TEMP%\crearacceso.vbs"
+    echo oLink.WorkingDirectory = "%~dp0" >> "%TEMP%\crearacceso.vbs"
+    echo oLink.Description = "RaidHelper Dashboard" >> "%TEMP%\crearacceso.vbs"
+    echo oLink.Save >> "%TEMP%\crearacceso.vbs"
+    cscript //nologo "%TEMP%\crearacceso.vbs"
+    del "%TEMP%\crearacceso.vbs"
+    echo  ✅ Acceso directo creado en el escritorio.
 )
 
 :: --- Verificar configuración y lanzar ---
