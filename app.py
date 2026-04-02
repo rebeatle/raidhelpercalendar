@@ -144,8 +144,8 @@ class DetalleEventoModal(ModalScreen):
 
 class RaidHelperApp(App):
 
-    TITLE    = "⚔ RaidHelper Dashboard"
-    SUB_TITLE = "Ken's Raid Tracker"
+    TITLE    = "⚔ RaidHelper Viewer"
+    SUB_TITLE = "Made by https://github.com/rebeatle"
 
     BINDINGS = [
     Binding("q", "quit",            "Salir"),

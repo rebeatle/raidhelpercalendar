@@ -13,7 +13,19 @@ def pausar():
 
 def encabezado():
     print("=" * 60)
-    print("   ⚔  RaidHelper Dashboard — Configuración")
+    print("   ⚔  RaidHelper Viewer — Configuración")
+    print(""" 
+____        _     _   _   _      _                 
+|  _ \ __ _(_) __| | | | | | ___| |_ __   ___ _ __ 
+| |_) / _` | |/ _` | | |_| |/ _ \ | '_ \ / _ \ '__|
+|  _ < (_| | | (_| | |  _  |  __/ | |_) |  __/ |   
+|_| \_\__,_|_|\__,_| |_| |_|\___|_| .__/ \___|_|   
+__     ___                        |_|              
+\ \   / (_) _____      _____ _ __                  
+ \ \ / /| |/ _ \ \ /\ / / _ \ '__|                 
+  \ V / | |  __/\ V  V /  __/ |                    
+   \_/  |_|\___| \_/\_/ \___|_|                    
+          """)
     print("=" * 60)
 
 def verificar_archivos() -> bool:
@@ -288,7 +300,7 @@ def primer_arranque():
     limpiar()
     encabezado()
     print("""
-  ¡Bienvenido a RaidHelper Dashboard!
+  ¡Bienvenido a RaidHelper Viewer!
   
   Vamos a configurar lo que falta.
 """)
