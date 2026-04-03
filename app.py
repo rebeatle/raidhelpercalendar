@@ -190,6 +190,7 @@ class RaidHelperApp(App):
         self._filtro_dias       = "7"
         self._filtro_texto      = ""
         self._filtro_servidor   = ""
+        self._fallidos          = []
         
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
@@ -223,11 +224,7 @@ class RaidHelperApp(App):
         self.call_from_thread(self._set_estado, "⏳ Consultando servidores...")
         eventos, fallidos = obtener_todos_los_eventos()
         self._todos_eventos = eventos
-        if fallidos:
-            self.call_from_thread(
-                self._set_estado,
-                f"⚠ Sin respuesta: {', '.join(fallidos)}"
-            )
+        self._fallidos      = fallidos
         self.call_from_thread(self._construir_tabla, eventos)
 
     def _set_estado(self, msg: str) -> None:
@@ -310,7 +307,8 @@ class RaidHelperApp(App):
 
             tabla.add_row(mark, fecha, hora, serv, tit, anot)
 
-        self._set_estado(f"READY {len(eventos)} evento(s)")
+        aviso = f" | ⚠ sin resp: {len(self._fallidos)}" if self._fallidos else ""
+        self._set_estado(f"READY {len(eventos)} evento(s){aviso}")
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:
