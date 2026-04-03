@@ -34,6 +34,7 @@ color coding by date proximity, and a mark showing which ones you're already sig
 - 📋 **Full event details** with role signups (Tanks, Healers, Melee, Ranged)
 - ⚡ **Parallel loading** — all servers fetched simultaneously
 - 🔄 **Auto-reload** every 3 minutes (pauses while viewing event details)
+- 💬 **Visual empty state** when no events match the current filters
 - ⌨️ **100% keyboard and mouse** — fast navigation
 
 ---

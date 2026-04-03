@@ -35,6 +35,7 @@ colores por proximidad de fecha, y la marca de en cuáles ya estás anotado.
 - 📋 **Detalle completo** de cada evento con signups por rol (Tanks, Healers, Melee, Ranged)
 - ⚡ **Carga paralela** de todos los servidores simultáneamente
 - 🔄 **Auto-recarga** cada 3 minutos (se pausa si estás viendo el detalle de un evento)
+- 💬 **Estado visual** cuando no hay eventos para mostrar
 - ⌨️ **100% teclado y Mouse** — navegación rápida
 
 ---
