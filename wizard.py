@@ -117,13 +117,17 @@ def configurar_user_api_key():
   Si no tienes o no quieres usarla, simplemente
   presiona Enter para saltar este paso.
 """)
-    key = input("  Pega tu User API Key (o Enter para saltar): ").strip()
+    tiene_key = os.path.exists('api_key.txt') and open('api_key.txt', encoding='utf-8').read().strip()
+    aviso_saltar = "Enter para conservar la actual" if tiene_key else "Enter para saltar"
+    key = input(f"  Pega tu User API Key ({aviso_saltar}): ").strip()
+    if not key:
+        msg = "  ⏭  Sin cambios. Key anterior conservada." if tiene_key else "  ⏭  Saltado."
+        print(msg)
+        pausar()
+        return True
     with open('api_key.txt', 'w', encoding='utf-8') as f:
         f.write(key)
-    if key:
-        print("  ✅ API Key guardada correctamente.")
-    else:
-        print("  ⏭  Saltado. Puedes configurarlo después con la tecla C en la app.")
+    print("  ✅ API Key guardada correctamente.")
     pausar()
     return True
 
