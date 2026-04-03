@@ -38,15 +38,9 @@ def obtener_todos_los_eventos() -> tuple[list, list]:
                 fallidos.append(s_id)
             for ev in eventos:
                 if int(ev.get("unixtime", 0)) > ahora_unix:
-                    raid_id        = str(ev.get("raidId", ""))
-                    item_agenda    = mi_agenda.get(raid_id, {})
+                    raid_id         = str(ev.get("raidId", ""))
                     ev["_servidor"] = nombre
                     ev["_anotado"]  = raid_id in mi_agenda
-                    ev["_mi_rol"]   = (
-                        item_agenda.get("role", "")
-                        or item_agenda.get("class", "")
-                        or item_agenda.get("className", "")
-                    )
                     todos.append(ev)
 
     return sorted(todos, key=lambda x: x["unixtime"]), fallidos

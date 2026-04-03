@@ -177,6 +177,12 @@ class RaidHelperApp(App):
     DataTable {
         height: 1fr;
     }
+    #mensaje-vacio {
+        width: 1fr;
+        height: 1fr;
+        content-align: center middle;
+        color: $text-muted;
+    }
     #inp-buscar {
         width: 25;
         margin: 0 1;
@@ -224,6 +230,7 @@ class RaidHelperApp(App):
 
         with Container(id="contenedor-tabla"):
             yield LoadingIndicator()
+            yield Static("", id="mensaje-vacio")
 
         yield Footer()
 
@@ -268,11 +275,11 @@ class RaidHelperApp(App):
         try:
             tabla = self.query_one("#tabla", DataTable)
             tabla.clear(columns=True)
-            tabla.add_columns("Inscrito", "Rol", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
         except Exception:
             tabla = DataTable(id="tabla", cursor_type="row")
             self.query_one("#contenedor-tabla").mount(tabla)
-            tabla.add_columns("Inscrito", "Rol", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
 
         self._aplicar_filtros()
             
@@ -323,9 +330,18 @@ class RaidHelperApp(App):
             tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
             anot  = Text(str(ev.get("signupcount", "?")), style=color)
             mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
-            rol   = Text(ev.get("_mi_rol", "") if ev.get("_anotado") else "", style=color)
 
-            tabla.add_row(mark, rol, fecha, hora, serv, tit, anot)
+            tabla.add_row(mark, fecha, hora, serv, tit, anot)
+
+        try:
+            msg = self.query_one("#mensaje-vacio", Static)
+            if eventos:
+                msg.display = False
+            else:
+                msg.update("Elige un servidor para mostrar eventos")
+                msg.display = True
+        except Exception:
+            pass
 
         aviso = f" | ⚠ sin resp: {len(self._fallidos)}" if self._fallidos else ""
         self._set_estado(f"READY {len(eventos)} evento(s){aviso}")
