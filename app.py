@@ -10,7 +10,7 @@ from datetime import datetime, date
 from textual.widgets import Input  
 
 from api import obtener_todos_los_eventos
-from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos
+from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos, filtrar_por_texto, filtrar_por_fecha
 
 
 OPCIONES_DIAS = [
@@ -177,9 +177,13 @@ class RaidHelperApp(App):
     DataTable {
         height: 1fr;
     }
-    Input {
-    width: 25;
-    margin: 0 1;
+    #inp-buscar {
+        width: 25;
+        margin: 0 1;
+    }
+    #inp-fecha {
+        width: 18;
+        margin: 0 1;
     }
     """
 
@@ -190,11 +194,17 @@ class RaidHelperApp(App):
         self._filtro_dias       = "7"
         self._filtro_texto      = ""
         self._filtro_servidor   = ""
+        self._filtro_fecha      = ""
         self._fallidos          = []
         
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
         self._filtro_texto = event.value
+        self._aplicar_filtros()
+
+    @on(Input.Changed, "#inp-fecha")
+    def cambio_fecha(self, event: Input.Changed) -> None:
+        self._filtro_fecha = event.value
         self._aplicar_filtros()
         
         
@@ -208,6 +218,8 @@ class RaidHelperApp(App):
             yield Select(options=[("Todos", "")], value="", id="sel-servidor")
             yield Label("Buscar: ")
             yield Input(placeholder="título, servidor, líder...", id="inp-buscar")
+            yield Label("Fecha: ")
+            yield Input(placeholder="dd/mm  o  dd/mm/aaaa", id="inp-fecha")
             yield Static("Iniciando...", id="estado")
 
         with Container(id="contenedor-tabla"):
@@ -216,6 +228,13 @@ class RaidHelperApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
+        self.cargar_datos()
+        self.set_interval(180, self._auto_recargar)
+
+    def _auto_recargar(self) -> None:
+        """Recarga automática cada 3 min, pausada si hay un modal abierto."""
+        if isinstance(self.screen, DetalleEventoModal):
+            return
         self.cargar_datos()
 
     @work(thread=True)
@@ -265,8 +284,6 @@ class RaidHelperApp(App):
         except Exception:
             return
 
-        from filtros import filtrar_por_texto
-
         eventos = list(self._todos_eventos)
 
         if self._filtro_dias != "0":
@@ -275,6 +292,8 @@ class RaidHelperApp(App):
             eventos = filtrar_por_servidor(eventos, self._filtro_servidor)
         if self._filtro_texto:
             eventos = filtrar_por_texto(eventos, self._filtro_texto)
+        if self._filtro_fecha:
+            eventos = filtrar_por_fecha(eventos, self._filtro_fecha)
 
         self._eventos_filtrados = eventos
         tabla.clear()
