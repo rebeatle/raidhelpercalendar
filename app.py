@@ -221,8 +221,13 @@ class RaidHelperApp(App):
     def cargar_datos(self) -> None:
         """Carga datos de todos los servidores en hilo separado."""
         self.call_from_thread(self._set_estado, "⏳ Consultando servidores...")
-        eventos = obtener_todos_los_eventos()
+        eventos, fallidos = obtener_todos_los_eventos()
         self._todos_eventos = eventos
+        if fallidos:
+            self.call_from_thread(
+                self._set_estado,
+                f"⚠ Sin respuesta: {', '.join(fallidos)}"
+            )
         self.call_from_thread(self._construir_tabla, eventos)
 
     def _set_estado(self, msg: str) -> None:
@@ -297,7 +302,7 @@ class RaidHelperApp(App):
 
             DIAS  = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"]
             fecha = Text(f"{DIAS[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
-            hora  = Text(ev.get("time", "??:??"), style=color)
+            hora  = Text(dt.strftime('%H:%M'), style=color)
             serv  = Text(ev.get("_servidor", "?")[:22], style=color)
             tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
             anot  = Text(str(ev.get("signupcount", "?")), style=color)

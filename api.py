@@ -1,6 +1,9 @@
 import requests
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from config import ACCESS_TOKEN, USER_API_KEY, MIS_SERVIDORES, ENDPOINT_EVENTS, ENDPOINT_AGENDA, ENDPOINT_DETALLE
+
+MAX_WORKERS = 4
 
 
 def obtener_eventos_servidor(server_id: str) -> tuple[str, list]:
@@ -18,21 +21,28 @@ def obtener_eventos_servidor(server_id: str) -> tuple[str, list]:
         return server_id, []
 
 
-def obtener_todos_los_eventos() -> list:
-    """Consulta todos los servidores y retorna eventos futuros ordenados por fecha."""
-    ahora_unix  = int(time.time())
-    mi_agenda   = obtener_ids_mi_agenda()
-    todos       = []
+def obtener_todos_los_eventos() -> tuple[list, list]:
+    """Consulta todos los servidores en paralelo y retorna (eventos, servidores_fallidos)."""
+    ahora_unix      = int(time.time())
+    mi_agenda       = obtener_ids_mi_agenda()
+    todos           = []
+    fallidos        = []
 
-    for s_id in MIS_SERVIDORES:
-        nombre, eventos = obtener_eventos_servidor(s_id)
-        for ev in eventos:
-            if int(ev.get("unixtime", 0)) > ahora_unix:
-                ev["_servidor"]  = nombre
-                ev["_anotado"]   = str(ev.get("raidId", "")) in mi_agenda
-                todos.append(ev)
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futuros = {executor.submit(obtener_eventos_servidor, s_id): s_id
+                   for s_id in MIS_SERVIDORES}
+        for futuro in as_completed(futuros):
+            s_id = futuros[futuro]
+            nombre, eventos = futuro.result()
+            if not eventos and nombre == s_id:
+                fallidos.append(s_id)
+            for ev in eventos:
+                if int(ev.get("unixtime", 0)) > ahora_unix:
+                    ev["_servidor"] = nombre
+                    ev["_anotado"]  = str(ev.get("raidId", "")) in mi_agenda
+                    todos.append(ev)
 
-    return sorted(todos, key=lambda x: x["unixtime"])
+    return sorted(todos, key=lambda x: x["unixtime"]), fallidos
 
 
 def obtener_ids_mi_agenda() -> set:
