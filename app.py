@@ -196,7 +196,6 @@ class RaidHelperApp(App):
         self._filtro_servidor      = ""
         self._filtro_fecha         = ""
         self._fallidos             = []
-        self._actualizando_opciones = False
         
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
@@ -254,12 +253,10 @@ class RaidHelperApp(App):
             pass
 
     def _construir_tabla(self, eventos: list) -> None:
-        # Actualizar opciones de servidores sin disparar cambio_servidor
+        # Actualizar opciones de servidores
         servidores = obtener_servidores_unicos(eventos)
         opciones   = [("Todos los servidores", "")] + [(s, s) for s in servidores]
-        self._actualizando_opciones = True
         self.query_one("#sel-servidor", Select).set_options(opciones)
-        self._actualizando_opciones = False
 
         # Eliminar LoadingIndicator si todavía existe
         try:
@@ -335,14 +332,19 @@ class RaidHelperApp(App):
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:
-        self._filtro_dias = str(event.value)
+        val = event.value
+        if not val or val is Select.BLANK:
+            return
+        self._filtro_dias = str(val)
         self._aplicar_filtros()
 
     @on(Select.Changed, "#sel-servidor")
     def cambio_servidor(self, event: Select.Changed) -> None:
-        if self._actualizando_opciones:
-            return
-        self._filtro_servidor = str(event.value) if event.value else ""
+        val = event.value
+        if not val or val is Select.BLANK:
+            self._filtro_servidor = ""
+        else:
+            self._filtro_servidor = str(val)
         self._aplicar_filtros()
 
     @on(DataTable.RowSelected)
