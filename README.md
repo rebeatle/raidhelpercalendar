@@ -1,10 +1,8 @@
-# Spanish Version 
+# Spanish Version
 
 > 🌐 [Versión en español](README.es.md)
 
 # ⚔ Raid Helper Viewer (RHV)
-
-
 
 A desktop dashboard to visualize all your Raid Helper events
 across multiple Discord servers from a single screen.
@@ -32,17 +30,18 @@ color coding by date proximity, and a mark showing which ones you're already sig
 - 📅 **Unified view** of events from multiple servers
 - 🔴🟡🟢 **Color by proximity** — today, tomorrow, this week
 - ✅ **Mark your events** — instantly see where you're already signed up
-- 🔍 **Filters** by period, server, and free text
+- 🔍 **Filters** by period, server, free text, and exact date
 - 📋 **Full event details** with role signups (Tanks, Healers, Melee, Ranged)
+- ⚡ **Parallel loading** — all servers fetched simultaneously
+- 🔄 **Auto-reload** every 3 minutes (pauses while viewing event details)
 - ⌨️ **100% keyboard and mouse** — fast navigation
 
 ---
 
 ## Requirements
 
-- Windows 10 or higher
 - Python 3.10+ → [download here](https://www.python.org/downloads/)
-  - ⚠️ During installation, check **"Add Python to PATH"**
+  - ⚠️ On Windows, check **"Add Python to PATH"** during installation
 - Discord account with access to servers using Raid Helper
 
 ---
@@ -50,20 +49,20 @@ color coding by date proximity, and a mark showing which ones you're already sig
 ## Installation
 
 1. Download the repository as a ZIP and extract it to your desktop
-2. Open the folder and double-click **`launcher.bat`**
+2. Open the folder and run the launcher for your OS:
+   - **Windows:** double-click **`launcher.bat`**
+   - **Linux / macOS:** run **`./launcher.sh`** from the terminal
 3. The launcher installs dependencies automatically and guides you through setup
 
 ![launcher](screenshots/rhv_intro.png)
 
 ---
 
-If you are an advanced user, it is recommended to create a `.env` and install these dependencies:
-    pip install -r requirements.txt
+For advanced users, install dependencies manually:
 
-    textual>=0.8.0
-    requests>=2.28.0
-
-Otherwise, just download the files and place them on your desktop. Don’t forget to install Python. The launcher will handle everything automatically.
+```
+pip install -r requirements.txt
+```
 
 ---
 
@@ -90,16 +89,19 @@ This is your session token from raid-helper.xyz. To obtain it:
 
 > ⚠️ This token is personal — do not share it with anyone.
 > It expires over time. If the app stops showing events, repeat this process
-> and update your `api.txt` with the new token (option C → Settings).
+> and update your `api.txt` with the new token (option `C` → Settings).
 
 ### 2. User API Key *(optional)*
-Allows marking events with ✅ where you're already signed up.
+Allows marking events with `READY` where you're already signed up.
 
 1. In Discord, find the **Raid-Helper** bot in any server
 2. Send it a direct message with: `/usersettings apikey show`
 3. Copy the key it returns
 
-If you don’t configure it, the app still works but without signup marks.
+If you don't configure it, the app still works but without signup marks.
+
+> ℹ️ If you press Enter without typing anything in the settings menu,
+> your existing key is kept unchanged.
 
 ### 3. Discord Server IDs
 The servers where you have Raid Helper active.
@@ -131,6 +133,17 @@ You can enter them one by one or from a `.txt` file with one ID per line.
 
 ---
 
+## Filters
+
+| Filter | Description |
+|--------|-------------|
+| **Period** | Next 7, 14 or 30 days, or all |
+| **Server** | Filter by server name |
+| **Search** | Free text on title, server or leader |
+| **Date** | Exact date in `dd/mm` or `dd/mm/yyyy` format |
+
+---
+
 ## Colors
 
 | Color | Meaning |
@@ -144,20 +157,24 @@ You can enter them one by one or from a `.txt` file with one ID per line.
 
 ## FAQ
 
-**Why isn’t the app showing events?**
-Most likely your Access Token has expired. Go to Settings (`C`) → option 1, and follow the steps to get a new token.
+**Why isn't the app showing events?**
+Most likely your Access Token has expired. Go to Settings (`C`) → option 1,
+and follow the steps to get a new token.
 
-**Why don’t I see the ✅ on my events?**
+**Why don't I see `READY` on my events?**
 You need to configure the User API Key. Go to Settings (`C`) → option 2.
+If you already had it configured, it may have expired — get a new one with
+`/usersettings apikey show` in Discord and update it from the menu.
 
 **Does it work on Mac or Linux?**
-`launcher.bat` is Windows-only. On Mac/Linux you can run
-`python app.py` directly from the terminal, but setup must be done manually for now.
+Yes. Run `./launcher.sh` from the terminal. Make sure it has execute
+permissions first: `chmod +x launcher.sh`.
 
 **Is it official? Does it have Raid Helper permission?**
 This is not an official Raid Helper product. It uses the same API as the
 raid-helper.xyz frontend with your personal session. Each user authenticates
-with their own credentials. If Raid Helper changes its API, it may stop working until updated.
+with their own credentials. If Raid Helper changes its API, it may stop
+working until updated.
 
 ---
 
@@ -166,6 +183,24 @@ with their own credentials. If Raid Helper changes its API, it may stop working 
 RHV replicates the calls made by the raid-helper.xyz frontend using
 the Discord OAuth session `accessToken`. There is no publicly documented API —
 this was discovered by observing the network traffic of the official website.
+
+Event times are displayed in the **local timezone** of the machine running the app.
+
+---
+
+## Roadmap
+
+Features planned for future versions:
+
+- 📤 **Export to ICS** — generate an `.ics` file from the selected event
+  to import directly into Google Calendar, Outlook, or any calendar client.
+
+- 🎯 **Filter by role** — see which events have open spots for a specific
+  role (Tanks, Healers, Melee, Ranged), making it easier to decide where
+  to sign up.
+
+- 🔃 **Sortable columns** — sort the table by server, participant count,
+  or other fields by clicking on each column header.
 
 ---
 
