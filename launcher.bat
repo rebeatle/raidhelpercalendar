@@ -29,7 +29,7 @@ if not exist "servers.txt" goto setup
 goto launch
 
 :setup
-python setup.py auto
+python wizard.py auto
 goto launch
 
 :: --- Bucle principal ---
@@ -43,11 +43,11 @@ set /p EXIT_CODE=<.exit_code
 del ".exit_code"
 
 if "%EXIT_CODE%"=="3" (
-    python setup.py agregar
+    python wizard.py agregar
     goto launch
 )
 if "%EXIT_CODE%"=="2" (
-    python setup.py menu
+    python wizard.py menu
     goto launch
 )
 

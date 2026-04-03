@@ -188,7 +188,8 @@ class RaidHelperApp(App):
         self._todos_eventos     = []
         self._eventos_filtrados = []
         self._filtro_dias       = "7"
-        self._filtro_texto = ""
+        self._filtro_texto      = ""
+        self._filtro_servidor   = ""
         
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
@@ -337,14 +338,6 @@ class RaidHelperApp(App):
         """Recarga todos los datos desde la API."""
         self._set_estado("⏳ Recargando...")
         self.cargar_datos()
-
-    def action_abrir_config(self) -> None:
-        """Cierra la app y abre el menú de configuración."""
-        self.exit(return_code=2)
-
-    def action_agregar_servers(self) -> None:
-        """Cierra la app y abre agregar servidores."""
-        self.exit(return_code=3)
 
     def action_abrir_config(self) -> None:
         with open('.exit_code', 'w') as f:

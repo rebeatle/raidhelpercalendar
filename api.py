@@ -1,6 +1,6 @@
 import requests
 import time
-from config import ACCESS_TOKEN, USER_API_KEY, MIS_SERVIDORES, ENDPOINT_EVENTS, ENDPOINT_AGENDA
+from config import ACCESS_TOKEN, USER_API_KEY, MIS_SERVIDORES, ENDPOINT_EVENTS, ENDPOINT_AGENDA, ENDPOINT_DETALLE
 
 
 def obtener_eventos_servidor(server_id: str) -> tuple[str, list]:
@@ -59,7 +59,7 @@ def obtener_detalle_evento(raid_id: str) -> dict:
     """Obtiene el detalle completo de un evento incluyendo signups."""
     try:
         res = requests.post(
-            f"https://raid-helper.xyz/api/event/{raid_id}",
+            ENDPOINT_DETALLE.format(raid_id=raid_id),
             json={"accessToken": ACCESS_TOKEN},
             timeout=10
         )

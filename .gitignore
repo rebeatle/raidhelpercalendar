@@ -2,10 +2,8 @@
 api.txt
 api_key.txt
 cookie.txt
-__pycache__/api.cpython-311.pyc
-__pycache__/config.cpython-311.pyc
-__pycache__/filtros.cpython-311.pyc
-old_main.py
-old_mi_agenda.py
+__pycache__/
+*.pyc
+.exit_code
 servers.txt
 test/
