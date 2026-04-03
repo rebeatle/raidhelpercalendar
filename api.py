@@ -38,17 +38,24 @@ def obtener_todos_los_eventos() -> tuple[list, list]:
                 fallidos.append(s_id)
             for ev in eventos:
                 if int(ev.get("unixtime", 0)) > ahora_unix:
+                    raid_id        = str(ev.get("raidId", ""))
+                    item_agenda    = mi_agenda.get(raid_id, {})
                     ev["_servidor"] = nombre
-                    ev["_anotado"]  = str(ev.get("raidId", "")) in mi_agenda
+                    ev["_anotado"]  = raid_id in mi_agenda
+                    ev["_mi_rol"]   = (
+                        item_agenda.get("role", "")
+                        or item_agenda.get("class", "")
+                        or item_agenda.get("className", "")
+                    )
                     todos.append(ev)
 
     return sorted(todos, key=lambda x: x["unixtime"]), fallidos
 
 
-def obtener_ids_mi_agenda() -> set:
-    """Retorna un set con los IDs de eventos donde ya estás anotado."""
+def obtener_ids_mi_agenda() -> dict:
+    """Retorna un dict {id: item} de eventos futuros donde ya estás anotado."""
     if not USER_API_KEY:
-        return set()
+        return {}
     ahora_unix = int(time.time())
     try:
         url = ENDPOINT_AGENDA.format(api_key=USER_API_KEY)
@@ -57,13 +64,13 @@ def obtener_ids_mi_agenda() -> set:
         datos = res.json()
         if isinstance(datos, list):
             return {
-                str(e["id"])
+                str(e["id"]): e
                 for e in datos
                 if int(e.get("startTime", 0)) > ahora_unix
             }
-        return set()
+        return {}
     except Exception:
-        return set()
+        return {}
     
 def obtener_detalle_evento(raid_id: str) -> dict:
     """Obtiene el detalle completo de un evento incluyendo signups."""

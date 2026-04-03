@@ -189,13 +189,14 @@ class RaidHelperApp(App):
 
     def __init__(self):
         super().__init__()
-        self._todos_eventos     = []
-        self._eventos_filtrados = []
-        self._filtro_dias       = "7"
-        self._filtro_texto      = ""
-        self._filtro_servidor   = ""
-        self._filtro_fecha      = ""
-        self._fallidos          = []
+        self._todos_eventos        = []
+        self._eventos_filtrados    = []
+        self._filtro_dias          = "7"
+        self._filtro_texto         = ""
+        self._filtro_servidor      = ""
+        self._filtro_fecha         = ""
+        self._fallidos             = []
+        self._actualizando_opciones = False
         
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
@@ -253,10 +254,12 @@ class RaidHelperApp(App):
             pass
 
     def _construir_tabla(self, eventos: list) -> None:
-        # Actualizar opciones de servidores
+        # Actualizar opciones de servidores sin disparar cambio_servidor
         servidores = obtener_servidores_unicos(eventos)
         opciones   = [("Todos los servidores", "")] + [(s, s) for s in servidores]
+        self._actualizando_opciones = True
         self.query_one("#sel-servidor", Select).set_options(opciones)
+        self._actualizando_opciones = False
 
         # Eliminar LoadingIndicator si todavía existe
         try:
@@ -268,11 +271,11 @@ class RaidHelperApp(App):
         try:
             tabla = self.query_one("#tabla", DataTable)
             tabla.clear(columns=True)
-            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Rol", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
         except Exception:
             tabla = DataTable(id="tabla", cursor_type="row")
             self.query_one("#contenedor-tabla").mount(tabla)
-            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
+            tabla.add_columns("Inscrito", "Rol", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes")
 
         self._aplicar_filtros()
             
@@ -323,8 +326,9 @@ class RaidHelperApp(App):
             tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
             anot  = Text(str(ev.get("signupcount", "?")), style=color)
             mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
+            rol   = Text(ev.get("_mi_rol", "") if ev.get("_anotado") else "", style=color)
 
-            tabla.add_row(mark, fecha, hora, serv, tit, anot)
+            tabla.add_row(mark, rol, fecha, hora, serv, tit, anot)
 
         aviso = f" | ⚠ sin resp: {len(self._fallidos)}" if self._fallidos else ""
         self._set_estado(f"READY {len(eventos)} evento(s){aviso}")
@@ -336,6 +340,8 @@ class RaidHelperApp(App):
 
     @on(Select.Changed, "#sel-servidor")
     def cambio_servidor(self, event: Select.Changed) -> None:
+        if self._actualizando_opciones:
+            return
         self._filtro_servidor = str(event.value) if event.value else ""
         self._aplicar_filtros()
 
