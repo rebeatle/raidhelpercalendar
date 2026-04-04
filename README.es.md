@@ -1,7 +1,6 @@
-# English Version
+# Versión en Español
 
 > 🌐 [English version](README.md)
-
 
 # ⚔ Raid Helper Viewer (RHV)
 
@@ -36,6 +35,7 @@ colores por proximidad de fecha, y la marca de en cuáles ya estás anotado.
 - ⚡ **Carga paralela** de todos los servidores simultáneamente
 - 🔄 **Auto-recarga** cada 3 minutos (se pausa si estás viendo el detalle de un evento)
 - 💬 **Estado visual** cuando no hay eventos para mostrar
+- 🌐 **Español / Inglés** — idioma elegido al primer arranque, cambiable desde configuración
 - ⌨️ **100% teclado y Mouse** — navegación rápida
 
 ---
@@ -70,7 +70,12 @@ pip install -r requirements.txt
 
 ## Configuración inicial
 
-El launcher te pedirá 3 cosas la primera vez:
+### 0. Selección de idioma
+En el primer arranque se te pedirá elegir tu idioma antes que nada.
+
+![Selección de idioma](screenshots/lang_selection.png)
+
+Podés cambiarlo en cualquier momento desde el menú de configuración (`C` → opción 6).
 
 ### 1. Access Token
 Este es el token de tu sesión en raid-helper.xyz. Para obtenerlo:
@@ -132,6 +137,20 @@ Puedes ingresarlos uno por uno o desde un archivo `.txt` con un ID por línea.
 | `V` | Agregar más servidores |
 | `Esc` | Cerrar ventana de detalle |
 | `Q` | Salir |
+
+### Menú de configuración
+
+![Menú de configuración](screenshots/settings_menu.png)
+
+| Opción | Acción |
+|--------|--------|
+| `1` | Configurar Access Token |
+| `2` | Configurar User API Key |
+| `3` | Configurar Servidores de Discord |
+| `4` | Agregar más Servidores |
+| `5` | Lanzar la app |
+| `6` | Cambiar idioma |
+| `0` | Salir |
 
 ---
 

@@ -1,4 +1,4 @@
-# Spanish Version
+# English Version
 
 > 🌐 [Versión en español](README.es.md)
 
@@ -35,6 +35,7 @@ color coding by date proximity, and a mark showing which ones you're already sig
 - ⚡ **Parallel loading** — all servers fetched simultaneously
 - 🔄 **Auto-reload** every 3 minutes (pauses while viewing event details)
 - 💬 **Visual empty state** when no events match the current filters
+- 🌐 **Spanish / English** — language selected on first run, changeable from settings
 - ⌨️ **100% keyboard and mouse** — fast navigation
 
 ---
@@ -69,7 +70,12 @@ pip install -r requirements.txt
 
 ## Initial Setup
 
-The launcher will ask you for 3 things the first time:
+### 0. Language selection
+On the very first run, you will be asked to choose your language before anything else.
+
+![Language selection](screenshots/lang_selection.png)
+
+You can change it at any time from the settings menu (option `C` → option 6).
 
 ### 1. Access Token
 This is your session token from raid-helper.xyz. To obtain it:
@@ -131,6 +137,20 @@ You can enter them one by one or from a `.txt` file with one ID per line.
 | `V` | Add more servers |
 | `Esc` | Close detail window |
 | `Q` | Exit |
+
+### Settings menu
+
+![Settings menu](screenshots/settings_menu.png)
+
+| Option | Action |
+|--------|--------|
+| `1` | Configure Access Token |
+| `2` | Configure User API Key |
+| `3` | Configure Discord Servers |
+| `4` | Add more Servers |
+| `5` | Launch the app |
+| `6` | Change language |
+| `0` | Exit |
 
 ---
 

@@ -1,3 +1,6 @@
+from lang import t, tl, cargar_idioma
+cargar_idioma()
+
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, DataTable, Label, Select, LoadingIndicator, Static, Input
 from textual.containers import Container, Horizontal
@@ -11,26 +14,17 @@ from api import obtener_todos_los_eventos
 from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos, filtrar_por_texto, filtrar_por_fecha
 
 
-OPCIONES_DIAS = [
-    ("Próximos 7 días",  "7"),
-    ("Próximos 14 días", "14"),
-    ("Próximos 30 días", "30"),
-    ("Todos",            "0"),
-]
-
 class DetalleEventoModal(ModalScreen):
     """Modal con el detalle completo de un evento incluyendo signups."""
 
-    BINDINGS = [("escape", "dismiss", "Cerrar")]
+    BINDINGS = [("escape", "dismiss", t("bind_cerrar"))]
 
     def __init__(self, evento: dict):
         super().__init__()
         self.evento = evento
-        self._filtro_texto = ""
 
     def on_mount(self) -> None:
         self.focus()
-        # Cargamos el detalle completo en hilo separado
         self.cargar_detalle()
 
     @work(thread=True)
@@ -47,14 +41,14 @@ class DetalleEventoModal(ModalScreen):
             int(detalle.get("unixtime", 0))
         ).strftime('%d/%m/%Y %H:%M')
 
-        desc = detalle.get("description") or "Sin descripción"
+        desc = detalle.get("description") or t("sin_descripcion")
 
         # --- Inscripción vía API ---
         signup = self.evento.get("_signup")
         if signup:
             cabecera_ins = (
                 f"[bold magenta]{'─'*55}[/bold magenta]\n"
-                f"[bold magenta] Inscrito como:[/bold magenta]  "
+                f"[bold magenta]{t('inscrito_como')}[/bold magenta]  "
                 f"[white]{signup.get('name', '?')}[/white]  ·  "
                 f"[bold]{signup.get('specName', '?')}[/bold]  ·  "
                 f"[dim]{signup.get('className', '?')}[/dim]\n"
@@ -68,12 +62,12 @@ class DetalleEventoModal(ModalScreen):
             f"[bold cyan]{'='*55}[/bold cyan]\n"
             f"[bold white] {detalle.get('displayTitle', detalle.get('title', '?'))}[/bold white]\n"
             f"[bold cyan]{'='*55}[/bold cyan]\n\n"
-            f"[bold]Servidor:[/bold]  {detalle.get('servername', '?')}\n"
-            f"[bold]Fecha:[/bold]     {fecha}\n"
-            f"[bold]Líder:[/bold]     {detalle.get('leadername', '?')}\n"
-            f"[bold]Canal:[/bold]     #{detalle.get('channelName', '?')}\n"
-            f"[bold]Raid ID:[/bold]   {detalle.get('raidid', '?')}\n\n"
-            f"[bold]Descripción:[/bold]\n[dim]{desc}[/dim]\n\n"
+            f"[bold]{t('det_servidor')}[/bold]  {detalle.get('servername', '?')}\n"
+            f"[bold]{t('det_fecha')}[/bold]     {fecha}\n"
+            f"[bold]{t('det_lider')}[/bold]     {detalle.get('leadername', '?')}\n"
+            f"[bold]{t('det_canal')}[/bold]     #{detalle.get('channelName', '?')}\n"
+            f"[bold]{t('det_raid_id')}[/bold]   {detalle.get('raidid', '?')}\n\n"
+            f"[bold]{t('det_descripcion')}[/bold]\n[dim]{desc}[/dim]\n\n"
         )
 
         # --- Signups agrupados por rol ---
@@ -107,7 +101,6 @@ class DetalleEventoModal(ModalScreen):
                     texto += f"  {m.get('position','?'):>2}. [white]{nombre}[/white]  [dim]{clase} / {spec}[/dim]{nota}\n"
                 texto += "\n"
 
-            # Bench / Tentative / Ausentes si hay
             for estado in ["Bench", "Tentative", "Late", "Absence"]:
                 extras = [s for s in signups if s.get("status") == "default"
                           and s.get("class", "").lower() == estado.lower()]
@@ -118,27 +111,24 @@ class DetalleEventoModal(ModalScreen):
                     texto += "\n"
 
             total = len([s for s in signups if s.get("status") == "primary"])
-            texto += f"[bold cyan]Total anotados: {total}[/bold cyan]\n\n"
+            texto += f"[bold cyan]{t('total_anotados', n=total)}[/bold cyan]\n\n"
         else:
-            texto += "[dim]Sin anotados aún.[/dim]\n\n"
+            texto += f"[dim]{t('sin_anotados')}[/dim]\n\n"
 
-        texto += "[dim]ESC para cerrar[/dim]"
+        texto += f"[dim]{t('esc_cerrar')}[/dim]"
 
         try:
             self.query_one("#cargando", Static).update(texto)
         except Exception:
             pass
 
-        
     def compose(self) -> ComposeResult:
         titulo = self.evento.get("displayTitle", self.evento.get("title", "Evento"))
         yield Container(
-            Static(f"⏳ Cargando {titulo}...", id="cargando", markup=True),
+            Static(t("cargando_evento", titulo=titulo), id="cargando", markup=True),
             id="modal-cuerpo"
         )
 
-    
-    
     DEFAULT_CSS = """
     DetalleEventoModal {
         align: center middle;
@@ -160,11 +150,11 @@ class RaidHelperApp(App):
     SUB_TITLE = "Made by https://github.com/rebeatle"
 
     BINDINGS = [
-    Binding("q", "quit",            "Salir"),
-    Binding("r", "recargar",        "Recargar"),
-    Binding("c", "abrir_config",    "Configuración"),
-    Binding("v", "agregar_servers", "Agregar servidores"),
-]
+        Binding("q", "quit",            t("bind_salir")),
+        Binding("r", "recargar",        t("bind_recargar")),
+        Binding("c", "abrir_config",    t("bind_config")),
+        Binding("v", "agregar_servers", t("bind_agregar")),
+    ]
 
     DEFAULT_CSS = """
     #barra-filtros {
@@ -214,7 +204,7 @@ class RaidHelperApp(App):
         self._filtro_servidor      = ""
         self._filtro_fecha         = ""
         self._fallidos             = []
-        
+
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
         self._filtro_texto = event.value
@@ -224,26 +214,28 @@ class RaidHelperApp(App):
     def cambio_fecha(self, event: Input.Changed) -> None:
         self._filtro_fecha = event.value
         self._aplicar_filtros()
-        
-        
+
     def compose(self) -> ComposeResult:
+        opciones_dias = [
+            (t("dias_7"),    "7"),
+            (t("dias_14"),  "14"),
+            (t("dias_30"),  "30"),
+            (t("dias_todos"), "0"),
+        ]
         yield Header()
-
         with Horizontal(id="barra-filtros"):
-            yield Label(" Período: ")
-            yield Select(options=OPCIONES_DIAS, value="7", id="sel-dias")
-            yield Label("Servidor: ")
-            yield Select(options=[("Todos", "")], value="", id="sel-servidor")
-            yield Label("Buscar: ")
-            yield Input(placeholder="título, servidor, líder...", id="inp-buscar")
-            yield Label("Fecha: ")
-            yield Input(placeholder="dd/mm  o  dd/mm/aaaa", id="inp-fecha")
-            yield Static("Iniciando...", id="estado")
-
+            yield Label(t("label_periodo"))
+            yield Select(options=opciones_dias, value="7", id="sel-dias")
+            yield Label(t("label_servidor"))
+            yield Select(options=[(t("todos_servidores"), "")], value="", id="sel-servidor")
+            yield Label(t("label_buscar"))
+            yield Input(placeholder=t("placeholder_buscar"), id="inp-buscar")
+            yield Label(t("label_fecha"))
+            yield Input(placeholder=t("placeholder_fecha"), id="inp-fecha")
+            yield Static(t("iniciando"), id="estado")
         with Container(id="contenedor-tabla"):
             yield LoadingIndicator()
             yield Static("", id="mensaje-vacio")
-
         yield Footer()
 
     def on_mount(self) -> None:
@@ -251,15 +243,13 @@ class RaidHelperApp(App):
         self.set_interval(180, self._auto_recargar)
 
     def _auto_recargar(self) -> None:
-        """Recarga automática cada 3 min, pausada si hay un modal abierto."""
         if isinstance(self.screen, DetalleEventoModal):
             return
         self.cargar_datos()
 
     @work(thread=True)
     def cargar_datos(self) -> None:
-        """Carga datos de todos los servidores en hilo separado."""
-        self.call_from_thread(self._set_estado, "⏳ Consultando servidores...")
+        self.call_from_thread(self._set_estado, t("consultando"))
         eventos, fallidos = obtener_todos_los_eventos()
         self._todos_eventos = eventos
         self._fallidos      = fallidos
@@ -272,30 +262,31 @@ class RaidHelperApp(App):
             pass
 
     def _construir_tabla(self, eventos: list) -> None:
-        # Actualizar opciones de servidores
         servidores = obtener_servidores_unicos(eventos)
-        opciones   = [("Todos los servidores", "")] + [(s, s) for s in servidores]
+        opciones   = [(t("todos_servidores"), "")] + [(s, s) for s in servidores]
         self.query_one("#sel-servidor", Select).set_options(opciones)
 
-        # Eliminar LoadingIndicator si todavía existe
         try:
             self.query_one(LoadingIndicator).remove()
         except Exception:
             pass
 
-        # Si la tabla ya existe, la reutilizamos — si no, la creamos    
         try:
             tabla = self.query_one("#tabla", DataTable)
             tabla.clear(columns=True)
-            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes", "Rol")
+            tabla.add_columns(
+                t("col_inscrito"), t("col_fecha"), t("col_hora"),
+                t("col_servidor"), t("col_raid"), t("col_participantes"), t("col_rol")
+            )
         except Exception:
             tabla = DataTable(id="tabla", cursor_type="row")
             self.query_one("#contenedor-tabla").mount(tabla)
-            tabla.add_columns("Inscrito", "Fecha", "Hora", "Servidor", "Raid", "👥Participantes", "Rol")
+            tabla.add_columns(
+                t("col_inscrito"), t("col_fecha"), t("col_hora"),
+                t("col_servidor"), t("col_raid"), t("col_participantes"), t("col_rol")
+            )
 
         self._aplicar_filtros()
-            
-
 
     def _aplicar_filtros(self) -> None:
         try:
@@ -320,12 +311,12 @@ class RaidHelperApp(App):
         hoy    = date.today()
         manana = hoy.toordinal() + 1
         semana = hoy.toordinal() + 7
+        dias_semana = tl("dias_semana")
 
         for ev in eventos:
             dt     = datetime.fromtimestamp(int(ev["unixtime"]))
             ord_ev = dt.date().toordinal()
 
-            # --- Color según proximidad ---
             if ord_ev == hoy.toordinal():
                 color = "bold red"
             elif ord_ev == manana:
@@ -335,15 +326,14 @@ class RaidHelperApp(App):
             else:
                 color = "white"
 
-            DIAS  = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"]
-            fecha = Text(f"{DIAS[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
+            fecha = Text(f"{dias_semana[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
             hora  = Text(dt.strftime('%H:%M'), style=color)
             serv  = Text(ev.get("_servidor", "?")[:22], style=color)
-            tit   = Text(ev.get("displayTitle", ev.get("title", "Sin título"))[:32], style=color)
+            tit   = Text(ev.get("displayTitle", ev.get("title", t("sin_titulo")))[:32], style=color)
             anot  = Text(str(ev.get("signupcount", "?")), style=color)
             mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
 
-            signup  = ev.get("_signup")
+            signup = ev.get("_signup")
             if signup:
                 rol_txt = Text(f"{signup.get('name', '')} · {signup.get('specName', '')}", style=color)
             else:
@@ -356,13 +346,13 @@ class RaidHelperApp(App):
             if eventos:
                 msg.display = False
             else:
-                msg.update("Elige un servidor para mostrar eventos")
+                msg.update(t("mensaje_vacio"))
                 msg.display = True
         except Exception:
             pass
 
-        aviso = f" | ⚠ sin resp: {len(self._fallidos)}" if self._fallidos else ""
-        self._set_estado(f"READY {len(eventos)} evento(s){aviso}")
+        aviso = t("sin_resp", n=len(self._fallidos)) if self._fallidos else ""
+        self._set_estado(t("estado_eventos", n=len(eventos), aviso=aviso))
 
     @on(Select.Changed, "#sel-dias")
     def cambio_dias(self, event: Select.Changed) -> None:
@@ -383,13 +373,11 @@ class RaidHelperApp(App):
 
     @on(DataTable.RowSelected)
     def fila_seleccionada(self, event: DataTable.RowSelected) -> None:
-        """Se dispara cuando el usuario presiona Enter en una fila."""
         fila = event.cursor_row
         if 0 <= fila < len(self._eventos_filtrados):
             self.push_screen(DetalleEventoModal(self._eventos_filtrados[fila]))
 
     def action_ver_detalle(self) -> None:
-        """Abre el modal con el detalle del evento seleccionado."""
         try:
             tabla = self.query_one("#tabla", DataTable)
             fila  = tabla.cursor_row
@@ -399,8 +387,7 @@ class RaidHelperApp(App):
             pass
 
     def action_recargar(self) -> None:
-        """Recarga todos los datos desde la API."""
-        self._set_estado("⏳ Recargando...")
+        self._set_estado(t("recargando"))
         self.cargar_datos()
 
     def action_abrir_config(self) -> None:
@@ -412,6 +399,7 @@ class RaidHelperApp(App):
         with open('.exit_code', 'w') as f:
             f.write('3')
         self.exit()
+
 
 if __name__ == "__main__":
     RaidHelperApp().run()
