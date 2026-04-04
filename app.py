@@ -1,6 +1,6 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, DataTable, Label, Select, LoadingIndicator, Static, Button, Input
-from textual.containers import Container, Horizontal, Vertical
+from textual.widgets import Header, Footer, DataTable, Label, Select, LoadingIndicator, Static, Input
+from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
 from textual.binding import Binding
 from textual import work, on
@@ -9,8 +9,6 @@ from datetime import datetime, date
 
 from api import obtener_todos_los_eventos
 from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos, filtrar_por_texto, filtrar_por_fecha
-import inscripciones
-from inscripciones import ROLES
 
 
 OPCIONES_DIAS = [
@@ -51,17 +49,15 @@ class DetalleEventoModal(ModalScreen):
 
         desc = detalle.get("description") or "Sin descripción"
 
-        # --- Inscripción local ---
-        raid_id = str(self.evento.get("raidId", ""))
-        ins = inscripciones.obtener(raid_id)
-        if ins:
-            nombre_rol = ROLES.get(ins["rol"], ins["rol"])
+        # --- Inscripción vía API ---
+        signup = self.evento.get("_signup")
+        if signup:
             cabecera_ins = (
                 f"[bold magenta]{'─'*55}[/bold magenta]\n"
                 f"[bold magenta] Inscrito como:[/bold magenta]  "
-                f"[white]{ins['nombre']}[/white]  ·  "
-                f"[bold]{nombre_rol}[/bold]  ·  "
-                f"[dim]{ins['clase']}[/dim]\n"
+                f"[white]{signup.get('name', '?')}[/white]  ·  "
+                f"[bold]{signup.get('specName', '?')}[/bold]  ·  "
+                f"[dim]{signup.get('className', '?')}[/dim]\n"
                 f"[bold magenta]{'─'*55}[/bold magenta]\n\n"
             )
         else:
@@ -158,96 +154,6 @@ class DetalleEventoModal(ModalScreen):
     """
 
 
-OPCIONES_ROL = [
-    ("── Seleccionar rol ──", ""),
-    ("Tank    (T)", "T"),
-    ("Healer  (H)", "H"),
-    ("DPS     (D)", "D"),
-]
-
-
-class InscribirseModal(ModalScreen):
-    """Modal para registrar nombre, clase y rol en un evento."""
-
-    BINDINGS = [("escape", "dismiss", "Cancelar")]
-
-    DEFAULT_CSS = """
-    InscribirseModal {
-        align: center middle;
-    }
-    #modal-inscripcion {
-        width: 60;
-        height: auto;
-        background: $surface;
-        border: thick $accent;
-        padding: 2 4;
-    }
-    #titulo-inscripcion {
-        text-align: center;
-        color: $accent;
-        margin-bottom: 1;
-    }
-    #fila-nombre, #fila-clase, #fila-rol {
-        height: 3;
-        margin-bottom: 1;
-    }
-    #fila-nombre Label, #fila-clase Label, #fila-rol Label {
-        width: 10;
-        content-align: right middle;
-        padding-right: 1;
-    }
-    #botones-inscripcion {
-        height: 3;
-        align: center middle;
-        margin-top: 1;
-    }
-    #botones-inscripcion Button {
-        margin: 0 1;
-    }
-    """
-
-    def __init__(self, evento: dict, inscripcion_actual: dict | None = None):
-        super().__init__()
-        self.evento = evento
-        self.inscripcion_actual = inscripcion_actual or {}
-
-    def compose(self) -> ComposeResult:
-        titulo = self.evento.get("displayTitle", self.evento.get("title", "Evento"))
-        nombre_prev = self.inscripcion_actual.get("nombre", "")
-        clase_prev  = self.inscripcion_actual.get("clase", "")
-        rol_prev    = self.inscripcion_actual.get("rol", "")
-
-        with Container(id="modal-inscripcion"):
-            yield Static(f"Inscribirse: {titulo}", id="titulo-inscripcion", markup=False)
-            with Horizontal(id="fila-nombre"):
-                yield Label("Nombre:")
-                yield Input(value=nombre_prev, placeholder="Tu nombre en el raid", id="inp-nombre")
-            with Horizontal(id="fila-clase"):
-                yield Label("Clase:")
-                yield Input(value=clase_prev, placeholder="Ej: Paladin, Druid...", id="inp-clase")
-            with Horizontal(id="fila-rol"):
-                yield Label("Rol:")
-                yield Select(options=OPCIONES_ROL, value=rol_prev, id="sel-rol")
-            with Horizontal(id="botones-inscripcion"):
-                yield Button("Guardar", variant="primary", id="btn-guardar")
-                yield Button("Cancelar", id="btn-cancelar")
-
-    def on_mount(self) -> None:
-        self.query_one("#inp-nombre", Input).focus()
-
-    @on(Button.Pressed, "#btn-guardar")
-    def guardar(self) -> None:
-        nombre = self.query_one("#inp-nombre", Input).value.strip()
-        clase  = self.query_one("#inp-clase",  Input).value.strip()
-        rol    = self.query_one("#sel-rol",    Select).value
-        if nombre and clase and rol:
-            self.dismiss({"nombre": nombre, "clase": clase, "rol": str(rol)})
-
-    @on(Button.Pressed, "#btn-cancelar")
-    def cancelar(self) -> None:
-        self.dismiss(None)
-
-
 class RaidHelperApp(App):
 
     TITLE    = "⚔ RaidHelper Viewer"
@@ -256,7 +162,6 @@ class RaidHelperApp(App):
     BINDINGS = [
     Binding("q", "quit",            "Salir"),
     Binding("r", "recargar",        "Recargar"),
-    Binding("i", "inscribirse",     "Inscribirse"),
     Binding("c", "abrir_config",    "Configuración"),
     Binding("v", "agregar_servers", "Agregar servidores"),
 ]
@@ -412,24 +317,23 @@ class RaidHelperApp(App):
         self._eventos_filtrados = eventos
         tabla.clear()
 
-        hoy      = date.today()
-        manana   = hoy.toordinal() + 1
-        semana   = hoy.toordinal() + 7
-        mis_ins  = inscripciones.cargar()
+        hoy    = date.today()
+        manana = hoy.toordinal() + 1
+        semana = hoy.toordinal() + 7
 
         for ev in eventos:
-            dt       = datetime.fromtimestamp(int(ev["unixtime"]))
-            ord_ev   = dt.date().toordinal()
+            dt     = datetime.fromtimestamp(int(ev["unixtime"]))
+            ord_ev = dt.date().toordinal()
 
             # --- Color según proximidad ---
             if ord_ev == hoy.toordinal():
-                color = "bold red"        # hoy
+                color = "bold red"
             elif ord_ev == manana:
-                color = "bold yellow"     # mañana
+                color = "bold yellow"
             elif ord_ev <= semana:
-                color = "bold green"      # esta semana
+                color = "bold green"
             else:
-                color = "white"           # más lejos
+                color = "white"
 
             DIAS  = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"]
             fecha = Text(f"{DIAS[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
@@ -439,8 +343,11 @@ class RaidHelperApp(App):
             anot  = Text(str(ev.get("signupcount", "?")), style=color)
             mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
 
-            ins     = mis_ins.get(str(ev.get("raidId", "")))
-            rol_txt = Text(ins["rol"] if ins else "", style=color)
+            signup  = ev.get("_signup")
+            if signup:
+                rol_txt = Text(f"{signup.get('name', '')} · {signup.get('specName', '')}", style=color)
+            else:
+                rol_txt = Text("", style=color)
 
             tabla.add_row(mark, fecha, hora, serv, tit, anot, rol_txt)
 
@@ -488,33 +395,6 @@ class RaidHelperApp(App):
             fila  = tabla.cursor_row
             if 0 <= fila < len(self._eventos_filtrados):
                 self.push_screen(DetalleEventoModal(self._eventos_filtrados[fila]))
-        except Exception:
-            pass
-
-    def action_inscribirse(self) -> None:
-        """Abre el modal de inscripción local para la fila seleccionada (solo si READY)."""
-        try:
-            tabla = self.query_one("#tabla", DataTable)
-            fila  = tabla.cursor_row
-            if not (0 <= fila < len(self._eventos_filtrados)):
-                return
-            ev = self._eventos_filtrados[fila]
-            if not ev.get("_anotado"):
-                return
-            raid_id      = str(ev.get("raidId", ""))
-            inscripcion  = inscripciones.obtener(raid_id)
-
-            def _guardar(resultado):
-                if resultado:
-                    inscripciones.registrar(
-                        raid_id,
-                        resultado["nombre"],
-                        resultado["clase"],
-                        resultado["rol"],
-                    )
-                    self._aplicar_filtros()
-
-            self.push_screen(InscribirseModal(ev, inscripcion), _guardar)
         except Exception:
             pass
 
