@@ -2,8 +2,13 @@
 api.txt
 api_key.txt
 cookie.txt
+lang.txt
 __pycache__/
 *.pyc
 .exit_code
 servers.txt
 test/
+tests/
+error.txt
+mis_inscripciones.json
+.claude/
