@@ -7,9 +7,7 @@ STRINGS: dict[str, dict[str, object]] = {
         # General
         "continuar": "  Presiona Enter para continuar...",
         "menu_titulo": "Configuración",
-        "elige_opcion_12": "  Elige una opción (1 o 2): ",
         "opcion_invalida": "  ❌ Opción inválida.",
-        "enter_salir": "  Presiona ENTER 2 veces para salir",
 
         # Cambio de idioma
         "idioma_actual": "Idioma actual / Current language",
@@ -27,12 +25,11 @@ STRINGS: dict[str, dict[str, object]] = {
         "recuerda": "  Recuerda:",
         "atajos": """\
     C → Menú de configuración
-    V → Agregar más servidores
     R → Recargar eventos
     Q → Salir""",
 
         # Access Token
-        "token_titulo": "  [1/3] ACCESS TOKEN de Raid Helper",
+        "token_titulo": "  [1/2] ACCESS TOKEN de Raid Helper",
         "token_instrucciones": """
   Este token es tu sesión personal en raid-helper.xyz.
   Sigue estos pasos para obtenerlo:
@@ -68,9 +65,12 @@ STRINGS: dict[str, dict[str, object]] = {
         "token_guardado": "  ✅ Token guardado correctamente.",
         "token_invalido": "  ❌ El token parece inválido (código {code}).",
         "token_sin_conexion": "  ❌ No se pudo conectar a Raid Helper. Verifica tu internet.",
+        "token_servidores_detectando": "\n  Obteniendo tus servidores...",
+        "token_servidores_encontrados": "  ✅ {n} servidor(es) detectado(s):",
+        "token_sin_servidores": "  ⚠ No se detectaron servidores con este token.",
 
         # User API Key
-        "apikey_titulo": "  [2/3] USER API KEY de Raid Helper (opcional)",
+        "apikey_titulo": "  [2/2] USER API KEY de Raid Helper (opcional)",
         "apikey_instrucciones": """
   Esta key te permite marcar los eventos donde ya estás
   anotado con un "READY" en la lista.
@@ -94,62 +94,20 @@ STRINGS: dict[str, dict[str, object]] = {
         "apikey_saltado": "  ⏭  Saltado.",
         "apikey_guardada": "  ✅ API Key guardada correctamente.",
 
-        # Servidores
-        "servers_titulo": "  [3/3] IDs DE SERVIDORES DE DISCORD",
-        "servers_instrucciones": """
-  Necesitas los IDs de los servidores donde tienes Raid Helper activo.
-
-  ¿Cómo obtener un ID de servidor?
-  1. En Discord, activa el "Modo desarrollador":
-     Ajustes → Avanzado → Modo desarrollador ✅
-     (A veces demora un poco; se recomienda cerrar y abrir Discord
-     después de activarlo)
-  2. Haz click derecho en el servidor
-  3. Selecciona "Copiar ID del servidor"
-""",
-        "servers_como_ingresar": "  ¿Cómo quieres ingresar los IDs?",
-        "servers_uno_por_uno": "  [1] Uno por uno",
-        "servers_desde_archivo": "  [2] Desde un archivo .txt (un ID por línea)",
-        "servers_sin_ids": "  ❌ No se ingresó ningún ID válido.",
-        "servers_guardados": "  ✅ {n} servidor(es) guardado(s).",
-
-        # Entrada manual
-        "manual_ingresa": "\n  Ingresa los IDs uno por uno.",
-        "manual_deja_vacio": "  (Deja vacío y presiona Enter cuando termines)\n",
-        "manual_servidor_n": "  Servidor #{n} (o Enter para terminar): ",
-        "manual_id_agregado": "  ✅ ID {id} agregado.",
-        "manual_id_invalido": "  ❌ ID inválido, debe ser solo números.",
-
-        # Desde archivo
-        "archivo_ruta": "\n  Ruta del archivo .txt: ",
-        "archivo_no_encontrado": "  ❌ No se encontró el archivo: {ruta}",
-        "archivo_encontrados": "  ✅ Se encontraron {n} IDs válidos.",
-        "archivo_sin_ids": "  ❌ No se encontraron IDs válidos en el archivo.",
-
-        # Agregar servidores
-        "agregar_actuales": "\n  Servidores actuales: {n}",
-        "agregar_como": "\n  ¿Cómo quieres agregar más IDs?",
-        "agregar_nuevos": "\n  ✅ {n} servidor(es) nuevo(s) agregado(s).",
-        "agregar_total": "  Total ahora: {n} servidores.",
-        "agregar_ninguno": "\n  ⏭  No se agregaron servidores nuevos.",
-
         # Menú principal
         "menu_estado": "\n  Estado actual:",
         "menu_access_token": "Access Token  ",
         "menu_user_api_key": "User API Key  ",
-        "menu_servidores_lbl": "Servidores    ",
         "menu_configurado": "✅ Configurado",
         "menu_no_configurado": "❌ No configurado",
         "menu_que_deseas": "\n  ¿Qué deseas hacer?",
         "menu_op1": "  [1] Configurar Access Token",
         "menu_op2": "  [2] Configurar User API Key",
-        "menu_op3": "  [3] Configurar Servidores de Discord",
-        "menu_op4": "  [4] Agregar más Servidores",
-        "menu_op5": "  [5] Lanzar la app",
-        "menu_op6": "  [6] Cambiar idioma / Change language",
+        "menu_op3": "  [3] Lanzar la app",
+        "menu_op4": "  [4] Cambiar idioma / Change language",
         "menu_op0": "  [0] Salir",
         "menu_elige": "  Elige una opción: ",
-        "menu_falta_config": "\n  ❌ Debes configurar el Access Token y los Servidores primero.",
+        "menu_falta_config": "\n  ❌ Debes configurar el Access Token primero.",
 
         # UI de la app
         "dias_7": "Próximos 7 días",
@@ -176,7 +134,6 @@ STRINGS: dict[str, dict[str, object]] = {
         "bind_salir": "Salir",
         "bind_recargar": "Recargar",
         "bind_config": "Configuración",
-        "bind_agregar": "Agregar servidores",
         "bind_cerrar": "Cerrar",
         "sin_titulo": "Sin título",
         "sin_descripcion": "Sin descripción",
@@ -188,6 +145,8 @@ STRINGS: dict[str, dict[str, object]] = {
         "sin_resp": " | ⚠ sin resp: {n}",
         "estado_eventos": "READY {n} evento(s){aviso}",
         "mensaje_vacio": "Elige un servidor para mostrar eventos",
+        "token_expirado_ui": "⚠ Token expirado — presiona C para actualizarlo",
+        "token_expirado_msg": "⚠ Token expirado o inválido.\nPresiona C → opción 1 para actualizarlo.",
         "det_servidor": "Servidor:",
         "det_fecha": "Fecha:",
         "det_lider": "Líder:",
@@ -201,9 +160,7 @@ STRINGS: dict[str, dict[str, object]] = {
         # General
         "continuar": "  Press Enter to continue...",
         "menu_titulo": "Configuration",
-        "elige_opcion_12": "  Choose an option (1 or 2): ",
         "opcion_invalida": "  ❌ Invalid option.",
-        "enter_salir": "  Press ENTER twice to exit",
 
         # Language change
         "idioma_actual": "Current language / Idioma actual",
@@ -221,12 +178,11 @@ STRINGS: dict[str, dict[str, object]] = {
         "recuerda": "  Remember:",
         "atajos": """\
     C → Settings menu
-    V → Add more servers
     R → Reload events
     Q → Exit""",
 
         # Access Token
-        "token_titulo": "  [1/3] ACCESS TOKEN for Raid Helper",
+        "token_titulo": "  [1/2] ACCESS TOKEN for Raid Helper",
         "token_instrucciones": """
   This token is your personal session on raid-helper.xyz.
   Follow these steps to obtain it:
@@ -262,9 +218,12 @@ STRINGS: dict[str, dict[str, object]] = {
         "token_guardado": "  ✅ Token saved successfully.",
         "token_invalido": "  ❌ Token appears invalid (code {code}).",
         "token_sin_conexion": "  ❌ Could not connect to Raid Helper. Check your internet.",
+        "token_servidores_detectando": "\n  Fetching your servers...",
+        "token_servidores_encontrados": "  ✅ {n} server(s) detected:",
+        "token_sin_servidores": "  ⚠ No servers detected with this token.",
 
         # User API Key
-        "apikey_titulo": "  [2/3] USER API KEY for Raid Helper (optional)",
+        "apikey_titulo": "  [2/2] USER API KEY for Raid Helper (optional)",
         "apikey_instrucciones": """
   This key allows you to mark events where you're already
   signed up with "READY" in the list.
@@ -287,62 +246,20 @@ STRINGS: dict[str, dict[str, object]] = {
         "apikey_saltado": "  ⏭  Skipped.",
         "apikey_guardada": "  ✅ API Key saved successfully.",
 
-        # Servers
-        "servers_titulo": "  [3/3] DISCORD SERVER IDs",
-        "servers_instrucciones": """
-  You need the IDs of the servers where you have Raid Helper active.
-
-  How to get a server ID?
-  1. In Discord, enable "Developer Mode":
-     Settings → Advanced → Developer Mode ✅
-     (It may take a moment; recommended to close and reopen Discord
-     after enabling it)
-  2. Right-click the server
-  3. Select "Copy Server ID"
-""",
-        "servers_como_ingresar": "  How would you like to enter the IDs?",
-        "servers_uno_por_uno": "  [1] One by one",
-        "servers_desde_archivo": "  [2] From a .txt file (one ID per line)",
-        "servers_sin_ids": "  ❌ No valid ID was entered.",
-        "servers_guardados": "  ✅ {n} server(s) saved.",
-
-        # Manual entry
-        "manual_ingresa": "\n  Enter IDs one by one.",
-        "manual_deja_vacio": "  (Leave empty and press Enter when done)\n",
-        "manual_servidor_n": "  Server #{n} (or Enter to finish): ",
-        "manual_id_agregado": "  ✅ ID {id} added.",
-        "manual_id_invalido": "  ❌ Invalid ID, must be numbers only.",
-
-        # From file
-        "archivo_ruta": "\n  Path to .txt file: ",
-        "archivo_no_encontrado": "  ❌ File not found: {ruta}",
-        "archivo_encontrados": "  ✅ Found {n} valid IDs.",
-        "archivo_sin_ids": "  ❌ No valid IDs found in file.",
-
-        # Add servers
-        "agregar_actuales": "\n  Current servers: {n}",
-        "agregar_como": "\n  How would you like to add more IDs?",
-        "agregar_nuevos": "\n  ✅ {n} new server(s) added.",
-        "agregar_total": "  Total now: {n} servers.",
-        "agregar_ninguno": "\n  ⏭  No new servers were added.",
-
         # Main menu
         "menu_estado": "\n  Current status:",
         "menu_access_token": "Access Token  ",
         "menu_user_api_key": "User API Key  ",
-        "menu_servidores_lbl": "Servers       ",
         "menu_configurado": "✅ Configured",
         "menu_no_configurado": "❌ Not configured",
         "menu_que_deseas": "\n  What would you like to do?",
         "menu_op1": "  [1] Configure Access Token",
         "menu_op2": "  [2] Configure User API Key",
-        "menu_op3": "  [3] Configure Discord Servers",
-        "menu_op4": "  [4] Add more Servers",
-        "menu_op5": "  [5] Launch the app",
-        "menu_op6": "  [6] Change language / Cambiar idioma",
+        "menu_op3": "  [3] Launch the app",
+        "menu_op4": "  [4] Change language / Cambiar idioma",
         "menu_op0": "  [0] Exit",
         "menu_elige": "  Choose an option: ",
-        "menu_falta_config": "\n  ❌ You must configure the Access Token and Servers first.",
+        "menu_falta_config": "\n  ❌ You must configure the Access Token first.",
 
         # App UI
         "dias_7": "Next 7 days",
@@ -369,7 +286,6 @@ STRINGS: dict[str, dict[str, object]] = {
         "bind_salir": "Exit",
         "bind_recargar": "Reload",
         "bind_config": "Settings",
-        "bind_agregar": "Add servers",
         "bind_cerrar": "Close",
         "sin_titulo": "No title",
         "sin_descripcion": "No description",
@@ -381,6 +297,8 @@ STRINGS: dict[str, dict[str, object]] = {
         "sin_resp": " | ⚠ no resp: {n}",
         "estado_eventos": "READY {n} event(s){aviso}",
         "mensaje_vacio": "Choose a server to show events",
+        "token_expirado_ui": "⚠ Token expired — press C to update it",
+        "token_expirado_msg": "⚠ Token expired or invalid.\nPress C → option 1 to update it.",
         "det_servidor": "Server:",
         "det_fecha": "Date:",
         "det_lider": "Leader:",

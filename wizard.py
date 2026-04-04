@@ -2,9 +2,9 @@ import os
 import sys
 import requests
 
-from lang import t, tl, cargar_idioma, guardar_idioma, get_lang
+from lang import t, cargar_idioma, guardar_idioma, get_lang
 
-ARCHIVOS_REQUERIDOS = ["api.txt", "api_key.txt", "servers.txt"]
+ARCHIVOS_REQUERIDOS = ["api.txt", "api_key.txt"]
 
 
 def limpiar():
@@ -85,6 +85,28 @@ def cambiar_idioma():
     pausar()
 
 
+def _mostrar_preview_servidores(token: str) -> None:
+    """Llama al endpoint de auth y muestra los servidores detectados."""
+    print(t("token_servidores_detectando"))
+    try:
+        res = requests.get(
+            f"https://raid-helper.xyz/api/auth/{token}",
+            timeout=10
+        )
+        guilds = res.json().get("guilds", [])
+        if guilds:
+            print(t("token_servidores_encontrados", n=len(guilds)))
+            for g in guilds[:10]:
+                premium = " ★" if g.get("premium") else ""
+                print(f"    • {g.get('name', g['id'])}{premium}")
+            if len(guilds) > 10:
+                print(f"    ... (+{len(guilds) - 10})")
+        else:
+            print(t("token_sin_servidores"))
+    except Exception:
+        pass  # No es crítico — el token ya fue guardado
+
+
 def configurar_access_token():
     limpiar()
     encabezado()
@@ -107,6 +129,7 @@ def configurar_access_token():
             with open('api.txt', 'w', encoding='utf-8') as f:
                 f.write(token)
             print(t("token_guardado"))
+            _mostrar_preview_servidores(token)
             pausar()
             return True
         else:
@@ -138,117 +161,6 @@ def configurar_user_api_key():
     return True
 
 
-def configurar_servidores():
-    limpiar()
-    encabezado()
-    print(t("servers_titulo"))
-    print(t("servers_instrucciones"))
-    print(t("servers_como_ingresar"))
-    print(t("servers_uno_por_uno"))
-    print(t("servers_desde_archivo"))
-    print(t("enter_salir"))
-    print()
-    opcion = input(t("elige_opcion_12")).strip()
-
-    ids = []
-    if opcion == "1":
-        ids = ingresar_ids_manual()
-    elif opcion == "2":
-        ids = ingresar_ids_desde_archivo()
-    else:
-        print(t("opcion_invalida"))
-        pausar()
-        return False
-
-    if not ids:
-        print(t("servers_sin_ids"))
-        pausar()
-        return False
-
-    guardar_servidores(ids)
-    print(t("servers_guardados", n=len(ids)))
-    pausar()
-    return True
-
-
-def ingresar_ids_manual() -> list:
-    ids = []
-    print(t("manual_ingresa"))
-    print(t("manual_deja_vacio"))
-    print(t("enter_salir"))
-    while True:
-        id_srv = input(t("manual_servidor_n", n=len(ids) + 1)).strip()
-        if not id_srv:
-            break
-        if id_srv.isdigit():
-            ids.append(id_srv)
-            print(t("manual_id_agregado", id=id_srv))
-        else:
-            print(t("manual_id_invalido"))
-    return ids
-
-
-def ingresar_ids_desde_archivo() -> list:
-    ruta = input(t("archivo_ruta")).strip().strip('"')
-    if not os.path.exists(ruta):
-        print(t("archivo_no_encontrado", ruta=ruta))
-        return []
-    ids = []
-    with open(ruta, 'r', encoding='utf-8') as f:
-        for linea in f:
-            id_srv = linea.strip()
-            if id_srv.isdigit():
-                ids.append(id_srv)
-    if ids:
-        print(t("archivo_encontrados", n=len(ids)))
-    else:
-        print(t("archivo_sin_ids"))
-    return ids
-
-
-def guardar_servidores(ids: list):
-    with open('servers.txt', 'w', encoding='utf-8') as f:
-        f.write('\n'.join(ids))
-
-
-def agregar_servidores():
-    limpiar()
-    encabezado()
-
-    ids_actuales = []
-    if os.path.exists('servers.txt'):
-        with open('servers.txt', 'r', encoding='utf-8') as f:
-            ids_actuales = [l.strip() for l in f if l.strip().isdigit()]
-
-    print(t("agregar_actuales", n=len(ids_actuales)))
-    for i, sid in enumerate(ids_actuales, 1):
-        print(f"    {i}. {sid}")
-
-    print(t("agregar_como"))
-    print(t("servers_uno_por_uno"))
-    print(t("servers_desde_archivo"))
-    print()
-    print(t("enter_salir"))
-    opcion = input(t("elige_opcion_12")).strip()
-
-    nuevos = []
-    if opcion == "1":
-        nuevos = ingresar_ids_manual()
-    elif opcion == "2":
-        nuevos = ingresar_ids_desde_archivo()
-
-    ids_finales = list(dict.fromkeys(ids_actuales + nuevos))
-    agregados   = len(ids_finales) - len(ids_actuales)
-
-    if agregados > 0:
-        guardar_servidores(ids_finales)
-        print(t("agregar_nuevos", n=agregados))
-        print(t("agregar_total", n=len(ids_finales)))
-    else:
-        print(t("agregar_ninguno"))
-    pausar()
-
-
 def menu_configuracion():
     while True:
         limpiar()
@@ -256,23 +168,18 @@ def menu_configuracion():
 
         falta_api = not os.path.exists('api.txt')
         falta_key = not os.path.exists('api_key.txt')
-        falta_srv = not os.path.exists('servers.txt')
 
         estado_api = t("menu_no_configurado") if falta_api else t("menu_configurado")
         estado_key = t("menu_no_configurado") if falta_key else t("menu_configurado")
-        estado_srv = t("menu_no_configurado") if falta_srv else t("menu_configurado")
 
         print(t("menu_estado"))
         print(f"    {t('menu_access_token')}: {estado_api}")
         print(f"    {t('menu_user_api_key')}: {estado_key}")
-        print(f"    {t('menu_servidores_lbl')}: {estado_srv}")
         print(t("menu_que_deseas"))
         print(t("menu_op1"))
         print(t("menu_op2"))
         print(t("menu_op3"))
         print(t("menu_op4"))
-        print(t("menu_op5"))
-        print(t("menu_op6"))
         print(t("menu_op0"))
         print()
         opcion = input(t("menu_elige")).strip()
@@ -282,16 +189,12 @@ def menu_configuracion():
         elif opcion == "2":
             configurar_user_api_key()
         elif opcion == "3":
-            configurar_servidores()
-        elif opcion == "4":
-            agregar_servidores()
-        elif opcion == "5":
-            if falta_api or falta_srv:
+            if falta_api:
                 print(t("menu_falta_config"))
                 pausar()
             else:
                 return True
-        elif opcion == "6":
+        elif opcion == "4":
             cambiar_idioma()
         elif opcion == "0":
             sys.exit(0)
@@ -312,9 +215,6 @@ def primer_arranque():
     if not os.path.exists('api_key.txt'):
         configurar_user_api_key()
 
-    if not os.path.exists('servers.txt'):
-        configurar_servidores()
-
     limpiar()
     encabezado()
     print()
@@ -334,8 +234,6 @@ if __name__ == "__main__":
 
     if modo == "menu":
         menu_configuracion()
-    elif modo == "agregar":
-        agregar_servidores()
     elif modo == "auto":
         seleccionar_idioma()
         if not verificar_archivos():

@@ -10,8 +10,9 @@ from textual import work, on
 from rich.text import Text
 from datetime import datetime, date
 
-from api import obtener_todos_los_eventos
+from api import obtener_todos_los_eventos, obtener_servidores_usuario
 from filtros import filtrar_por_dias, filtrar_por_servidor, obtener_servidores_unicos, filtrar_por_texto, filtrar_por_fecha
+from config import ACCESS_TOKEN
 
 
 class DetalleEventoModal(ModalScreen):
@@ -146,14 +147,13 @@ class DetalleEventoModal(ModalScreen):
 
 class RaidHelperApp(App):
 
-    TITLE    = "⚔ RaidHelper Viewer"
+    TITLE     = "⚔ RaidHelper Viewer"
     SUB_TITLE = "Made by https://github.com/rebeatle"
 
     BINDINGS = [
-        Binding("q", "quit",            t("bind_salir")),
-        Binding("r", "recargar",        t("bind_recargar")),
-        Binding("c", "abrir_config",    t("bind_config")),
-        Binding("v", "agregar_servers", t("bind_agregar")),
+        Binding("q", "quit",         t("bind_salir")),
+        Binding("r", "recargar",     t("bind_recargar")),
+        Binding("c", "abrir_config", t("bind_config")),
     ]
 
     DEFAULT_CSS = """
@@ -197,13 +197,14 @@ class RaidHelperApp(App):
 
     def __init__(self):
         super().__init__()
-        self._todos_eventos        = []
-        self._eventos_filtrados    = []
-        self._filtro_dias          = "7"
-        self._filtro_texto         = ""
-        self._filtro_servidor      = ""
-        self._filtro_fecha         = ""
-        self._fallidos             = []
+        self._todos_eventos     = []
+        self._eventos_filtrados = []
+        self._servidores        = []
+        self._filtro_dias       = "7"
+        self._filtro_texto      = ""
+        self._filtro_servidor   = ""
+        self._filtro_fecha      = ""
+        self._fallidos          = []
 
     @on(Input.Changed, "#inp-buscar")
     def cambio_busqueda(self, event: Input.Changed) -> None:
@@ -217,10 +218,10 @@ class RaidHelperApp(App):
 
     def compose(self) -> ComposeResult:
         opciones_dias = [
-            (t("dias_7"),    "7"),
-            (t("dias_14"),  "14"),
-            (t("dias_30"),  "30"),
-            (t("dias_todos"), "0"),
+            (t("dias_7"),      "7"),
+            (t("dias_14"),    "14"),
+            (t("dias_30"),    "30"),
+            (t("dias_todos"),  "0"),
         ]
         yield Header()
         with Horizontal(id="barra-filtros"):
@@ -250,10 +251,28 @@ class RaidHelperApp(App):
     @work(thread=True)
     def cargar_datos(self) -> None:
         self.call_from_thread(self._set_estado, t("consultando"))
-        eventos, fallidos = obtener_todos_los_eventos()
+        servidores = obtener_servidores_usuario(ACCESS_TOKEN)
+        if not servidores:
+            self.call_from_thread(self._mostrar_token_expirado)
+            return
+        self._servidores = servidores
+        eventos, fallidos = obtener_todos_los_eventos(servidores)
         self._todos_eventos = eventos
         self._fallidos      = fallidos
         self.call_from_thread(self._construir_tabla, eventos)
+
+    def _mostrar_token_expirado(self) -> None:
+        try:
+            self.query_one(LoadingIndicator).remove()
+        except Exception:
+            pass
+        self._set_estado(t("token_expirado_ui"))
+        try:
+            msg = self.query_one("#mensaje-vacio", Static)
+            msg.update(t("token_expirado_msg"))
+            msg.display = True
+        except Exception:
+            pass
 
     def _set_estado(self, msg: str) -> None:
         try:
@@ -308,9 +327,9 @@ class RaidHelperApp(App):
         self._eventos_filtrados = eventos
         tabla.clear()
 
-        hoy    = date.today()
-        manana = hoy.toordinal() + 1
-        semana = hoy.toordinal() + 7
+        hoy         = date.today()
+        manana      = hoy.toordinal() + 1
+        semana      = hoy.toordinal() + 7
         dias_semana = tl("dias_semana")
 
         for ev in eventos:
@@ -326,18 +345,18 @@ class RaidHelperApp(App):
             else:
                 color = "white"
 
-            fecha = Text(f"{dias_semana[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
-            hora  = Text(dt.strftime('%H:%M'), style=color)
-            serv  = Text(ev.get("_servidor", "?")[:22], style=color)
-            tit   = Text(ev.get("displayTitle", ev.get("title", t("sin_titulo")))[:32], style=color)
-            anot  = Text(str(ev.get("signupcount", "?")), style=color)
-            mark  = Text("READY" if ev.get("_anotado") else "  ", style=color)
+            fecha   = Text(f"{dias_semana[dt.weekday()]} {dt.strftime('%d/%m/%Y')}", style=color)
+            hora    = Text(dt.strftime('%H:%M'), style=color)
+            serv    = Text(ev.get("_servidor", "?")[:22], style=color)
+            tit     = Text(ev.get("displayTitle", ev.get("title", t("sin_titulo")))[:32], style=color)
+            anot    = Text(str(ev.get("signupcount", "?")), style=color)
+            mark    = Text("READY" if ev.get("_anotado") else "  ", style=color)
 
-            signup = ev.get("_signup")
-            if signup:
-                rol_txt = Text(f"{signup.get('name', '')} · {signup.get('specName', '')}", style=color)
-            else:
-                rol_txt = Text("", style=color)
+            signup  = ev.get("_signup")
+            rol_txt = Text(
+                f"{signup.get('name', '')} · {signup.get('specName', '')}" if signup else "",
+                style=color
+            )
 
             tabla.add_row(mark, fecha, hora, serv, tit, anot, rol_txt)
 
@@ -393,11 +412,6 @@ class RaidHelperApp(App):
     def action_abrir_config(self) -> None:
         with open('.exit_code', 'w') as f:
             f.write('2')
-        self.exit()
-
-    def action_agregar_servers(self) -> None:
-        with open('.exit_code', 'w') as f:
-            f.write('3')
         self.exit()
 
 
