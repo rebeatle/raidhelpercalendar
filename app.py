@@ -159,9 +159,10 @@ class DetalleEventoModal(ModalScreen):
 
 
 OPCIONES_ROL = [
-    ("Tank  (T)", "T"),
-    ("Healer (H)", "H"),
-    ("DPS   (D)", "D"),
+    ("── Seleccionar rol ──", ""),
+    ("Tank    (T)", "T"),
+    ("Healer  (H)", "H"),
+    ("DPS     (D)", "D"),
 ]
 
 
@@ -214,7 +215,7 @@ class InscribirseModal(ModalScreen):
         titulo = self.evento.get("displayTitle", self.evento.get("title", "Evento"))
         nombre_prev = self.inscripcion_actual.get("nombre", "")
         clase_prev  = self.inscripcion_actual.get("clase", "")
-        rol_prev    = self.inscripcion_actual.get("rol", Select.BLANK)
+        rol_prev    = self.inscripcion_actual.get("rol", "")
 
         with Container(id="modal-inscripcion"):
             yield Static(f"Inscribirse: {titulo}", id="titulo-inscripcion", markup=False)
@@ -239,7 +240,7 @@ class InscribirseModal(ModalScreen):
         nombre = self.query_one("#inp-nombre", Input).value.strip()
         clase  = self.query_one("#inp-clase",  Input).value.strip()
         rol    = self.query_one("#sel-rol",    Select).value
-        if nombre and clase and rol and rol is not Select.BLANK:
+        if nombre and clase and rol:
             self.dismiss({"nombre": nombre, "clase": clase, "rol": str(rol)})
 
     @on(Button.Pressed, "#btn-cancelar")
