@@ -248,6 +248,15 @@ Pull requests are welcome. If something breaks due to changes in the Raid Helper
 To report bugs, suggestions, or commercial use:
 📧 rebeatle.dev@gmail.com
 
+
+## ☕ Apoyar el proyecto
+
+Si te resulta útil y quieres invitarme un café:
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/rebeatle)
+
+
+
 ---
 
 ## License
