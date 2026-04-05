@@ -12,6 +12,18 @@ across multiple Discord servers from a single screen.
 
 ---
 
+> ⚠️ **Aviso / Disclaimer**
+>
+> This is an unofficial, community-built tool. It is not affiliated with,
+> endorsed by, or connected to Raid Helper or its developers in any way.
+> It uses the same internal API that the raid-helper.xyz frontend uses,
+> authenticated with your own personal session. If Raid Helper changes
+> their API, this tool may stop working until updated.
+>
+> Use at your own risk. Your credentials are never stored on the server.
+
+---
+
 ## What is this?
 
 If you use Raid Helper across multiple Discord servers, you know the pain of
@@ -228,6 +240,13 @@ Features planned for future versions:
 ## Contributions
 
 Pull requests are welcome. If something breaks due to changes in the Raid Helper API, open an issue.
+
+---
+
+## Contact
+
+To report bugs, suggestions, or commercial use:
+📧 rebeatle.dev@gmail.com
 
 ---
 
